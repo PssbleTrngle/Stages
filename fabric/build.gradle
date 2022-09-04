@@ -1,0 +1,118 @@
+plugins {
+	id "com.github.johnrengelman.shadow" version "7.0.0"
+	id "com.matthewprenger.cursegradle" version "1.4.0"
+}
+
+def ENV = System.getenv()
+
+architectury {
+	platformSetupLoomIde()
+	fabric()
+}
+
+configurations {
+	common
+	shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+	compileClasspath.extendsFrom common
+	runtimeClasspath.extendsFrom common
+	developmentForge.extendsFrom common
+	dev
+}
+
+artifacts {
+	dev(jar)
+}
+
+dependencies {
+	modApi("net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}")
+	modApi("net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}")
+
+	modApi "dev.latvian.mods:kubejs-fabric:${rootProject.kubejs_version}"
+
+	modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}")
+	modRuntimeOnly("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}")
+
+	common(project(path: ":common", configuration: "dev")) { transitive false }
+	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+}
+
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+}
+
+shadowJar {
+	configurations = [project.configurations.shadowCommon]
+	classifier "dev-shadow"
+}
+
+remapJar {
+	input.set shadowJar.archiveFile
+	dependsOn shadowJar
+	archiveBaseName.set "${rootProject.archives_base_name}-${project.name}"
+	archiveClassifier.set null
+}
+
+jar {
+	classifier "dev"
+}
+
+components.java {
+	withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+		skip()
+	}
+}
+
+if (ENV.CURSEFORGE_KEY) {
+	curseforge {
+		apiKey = ENV.CURSEFORGE_KEY
+		project {
+			id = project.curseforge_id
+			releaseType = project.curseforge_type
+			addGameVersion "Fabric"
+			addGameVersion "1.18.2"
+			mainArtifact(remapJar.archivePath)
+			relations {
+				requiredDependency 'kubejs'
+				requiredDependency 'create-fabric'
+			}
+			changelog = getGitChangelog
+			changelogType = 'markdown'
+		}
+	}
+}
+
+publishing {
+	publications {
+		mavenFabric(MavenPublication) {
+			artifactId = "${rootProject.archives_base_name}-${project.name}"
+			from components.java
+		}
+	}
+
+	repositories {
+		if (ENV.FTB_MAVEN_TOKEN) {
+			maven {
+				url "https://maven.ftb.dev/release"
+				credentials {
+					username = "latvian"
+					password = "${ENV.FTB_MAVEN_TOKEN}"
+				}
+			}
+		}
+
+		if (ENV.SAPS_TOKEN) {
+			maven {
+				url "https://maven.saps.dev/minecraft"
+				credentials {
+					username = "latvian"
+					password = "${ENV.SAPS_TOKEN}"
+				}
+			}
+		}
+	}
+}
+

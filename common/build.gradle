@@ -1,0 +1,21 @@
+dependencies {
+	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+
+	modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+
+	modApi "dev.latvian.mods:kubejs:${rootProject.kubejs_version}"
+}
+
+def ENV = System.getenv()
+
+architectury {
+	common("fabric", "forge")
+}
+
+configurations {
+	dev
+}
+
+artifacts {
+	dev(jar)
+}

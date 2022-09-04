@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.possible_triangle.kubejs_stages.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "EventJSMixin"
+  ],
+  "client": [
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

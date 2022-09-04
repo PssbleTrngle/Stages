@@ -1,0 +1,11 @@
+pluginManagement {
+	repositories {
+		maven { url "https://maven.creeperhost.net/" }
+		maven { url "https://maven.shedaniel.me/" }
+		gradlePluginPortal()
+	}
+}
+
+include "common", "fabric", "forge"
+
+rootProject.name = 'KubeJS-Create-1.18.2'
