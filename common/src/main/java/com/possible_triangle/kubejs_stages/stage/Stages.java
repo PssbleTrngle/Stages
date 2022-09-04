@@ -9,8 +9,10 @@ import org.apache.commons.compress.utils.Lists;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class Stages {
 
@@ -26,15 +28,21 @@ public class Stages {
         });
     }
 
-    private static final HashMap<String, Consumer<Stage>> CLIENT_LISTENERS = Maps.newHashMap();
+    private static final HashMap<String, Consumer<Stream<Stage>>> CLIENT_LISTENERS = Maps.newHashMap();
 
     private static final ArrayList<Stage> SERVER_VALUES = Lists.newArrayList();
 
     public static void registerStage(Stage stage) {
         SERVER_VALUES.add(stage);
+        // todo change to resource listener
+        notifyListeners(Collections.singleton(stage));
     }
 
-    public static void onClient(String id, Consumer<Stage> listener) {
+    public static void onReceivedStage(String id, Consumer<Stage> listener) {
+        CLIENT_LISTENERS.put(id, stages -> stages.forEach(listener));
+    }
+
+    public static void onReceivedStages(String id, Consumer<Stream<Stage>> listener) {
         CLIENT_LISTENERS.put(id, listener);
     }
 
@@ -42,13 +50,13 @@ public class Stages {
         return SERVER_VALUES.stream().toList();
     }
 
-    public static void receivedSync(Collection<Stage> stages) {
-        stages.forEach(stage -> CLIENT_LISTENERS.values().forEach((it) -> {
+    public static void notifyListeners(Collection<Stage> stages) {
+        CLIENT_LISTENERS.values().forEach(listener -> {
             try {
-                it.accept(stage);
+                listener.accept(stages.stream());
             } catch (Throwable e) {
                 KubeJSStages.LOGGER.error("Client Handler encountered exception: {}", e.getMessage());
             }
-        }));
+        });
     }
 }

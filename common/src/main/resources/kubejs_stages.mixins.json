@@ -4,9 +4,13 @@
   "package": "com.possible_triangle.kubejs_stages.mixins",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "EventJSMixin"
+    "BlockBehaviourMixin",
+    "EventJSMixin",
+    "OreBlockMixin",
+    "PlayerMixin"
   ],
   "client": [
+    "BlockModelShaperMixin"
   ],
   "server": [],
   "injectors": {

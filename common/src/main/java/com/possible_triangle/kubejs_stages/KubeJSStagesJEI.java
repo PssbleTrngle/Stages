@@ -21,7 +21,7 @@ public class KubeJSStagesJEI implements IModPlugin {
     @Override
     public void onRuntimeAvailable(IJeiRuntime runtime) {
         var ingredients = runtime.getIngredientManager();
-        Stages.onClient("jei", stage -> {
+        Stages.onReceivedStage("jei", stage -> {
             ingredients.removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, stage.stacks());
             PlatformJEI.handleStage(stage, runtime);
         });

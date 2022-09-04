@@ -13,5 +13,6 @@ public class KubeJSStages {
 	public static void init() {
 		StagesNetwork.init();
 		Stages.setup();
+		Disguises.init();
 	}
 }
