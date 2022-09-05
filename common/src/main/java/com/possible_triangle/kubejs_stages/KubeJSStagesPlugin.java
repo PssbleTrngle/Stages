@@ -1,6 +1,7 @@
 package com.possible_triangle.kubejs_stages;
 
 import com.possible_triangle.kubejs_stages.stage.StageBuilder;
+import com.possible_triangle.kubejs_stages.stage.Stages;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
@@ -18,7 +19,8 @@ public class KubeJSStagesPlugin extends KubeJSPlugin {
 
             var id = args[0].toString();
             var consumer = (StageBuilder.Consumer) args[1];
-            StageBuilder.create(id, consumer);
+            var stage = StageBuilder.create(consumer);
+            Stages.registerStage(id, stage);
             return null;
         }, null, StageBuilder.Consumer.class);
 

@@ -77,7 +77,6 @@ if (ENV.CURSEFORGE_KEY) {
 			mainArtifact(remapJar.archivePath)
 			relations {
 				requiredDependency 'kubejs'
-				requiredDependency 'create-fabric'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'

@@ -11,8 +11,8 @@ import net.minecraft.server.level.ServerPlayer;
 public class StagesNetwork {
     private static final ResourceLocation SYNC_PACKET = new ResourceLocation(KubeJSStages.ID, "sync");
 
-    private static void sync(ServerPlayer player) {
-        var packet = new SyncMessage(Stages.getServerStages());
+    public static void sync(ServerPlayer player) {
+        var packet = Stages.createSyncMessage();
         NetworkManager.sendToPlayer(player, SYNC_PACKET, packet.encode(player.server.registryAccess()));
     }
 

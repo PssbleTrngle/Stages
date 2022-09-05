@@ -1,6 +1,6 @@
 package com.possible_triangle.kubejs_stages.mixins;
 
-import com.possible_triangle.kubejs_stages.Disguises;
+import com.possible_triangle.kubejs_stages.features.StagesDisguises;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.level.block.Block;
@@ -23,7 +23,7 @@ public class BlockModelShaperMixin {
 
     @Inject(at = @At("HEAD"), method = "getBlockModel(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/client/resources/model/BakedModel;", cancellable = true)
     private void removeLockedRecipes(BlockState blockState, CallbackInfoReturnable<BakedModel> cir) {
-        Disguises.getDisguise(blockState.getBlock())
+        StagesDisguises.getDisguise(blockState.getBlock())
                 .map(Block::defaultBlockState)
                 .map(modelByStateCache::get)
                 .ifPresent(cir::setReturnValue);

@@ -12,22 +12,18 @@ public class StageBuilder {
         void accept(StageBuilder builder);
     }
 
-    private final String id;
+    private StageBuilder() {
 
-    private StageBuilder(String id) {
-        this.id = id;
     }
 
-    public static void create(String id, Consumer consumer) {
-        var builder = new StageBuilder(id);
+    public static StageBuilder create(Consumer consumer) {
+        var builder = new StageBuilder();
         consumer.accept(builder);
-        var stage = builder.build();
-
-        Stages.registerStage(stage);
+        return builder;
     }
 
-    private Stage build() {
-        return new Stage(id, items.build(), fluids.build(), disguisedBlocks.build());
+    public Stage build() {
+        return new Stage(items.build(), fluids.build(), disguisedBlocks.build());
     }
 
     private final ImmutableSet.Builder<IngredientJS> items = new ImmutableSet.Builder<>();

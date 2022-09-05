@@ -12,7 +12,10 @@ public class PlatformJEIImpl {
         var fluids = stage.fluids().stream()
                 .map(FluidStackJS::getFluidStack)
                 .map(FluidStackHooksForge::toForge).toList();
-        runtime.getIngredientManager().removeIngredientsAtRuntime(ForgeTypes.FLUID_STACK, fluids);
+
+        if (!fluids.isEmpty()) {
+            runtime.getIngredientManager().removeIngredientsAtRuntime(ForgeTypes.FLUID_STACK, fluids);
+        }
     }
 
 }

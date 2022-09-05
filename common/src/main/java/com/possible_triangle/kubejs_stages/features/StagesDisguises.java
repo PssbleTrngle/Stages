@@ -1,4 +1,4 @@
-package com.possible_triangle.kubejs_stages;
+package com.possible_triangle.kubejs_stages.features;
 
 import com.google.common.collect.ImmutableMap;
 import com.possible_triangle.kubejs_stages.stage.Stages;
@@ -7,18 +7,20 @@ import net.minecraft.world.level.block.Block;
 import java.util.Map;
 import java.util.Optional;
 
-public class Disguises {
+public class StagesDisguises {
 
     private static Map<Block, Block> blocks;
+    private static Map<Block, Float> breakSpeedFactors;
 
     public static void init() {
-        Stages.onReceivedStages("disguises", stages -> {
-            var disguises = new ImmutableMap.Builder<Block, Block>();
-            stages.forEach(stage -> {
-                disguises.putAll(stage.disguisedBlocks());
+        Stages.onChange("disguises", stage -> {
+            blocks = stage.disguisedBlocks();
 
+            var disguises = new ImmutableMap.Builder<Block, Float>();
+            blocks.forEach((block, disguise) -> {
+                disguises.put(block, block.defaultDestroyTime() / disguise.defaultDestroyTime());
             });
-            blocks = disguises.build();
+            breakSpeedFactors = disguises.build();
         });
 
         /*
@@ -35,6 +37,11 @@ public class Disguises {
     public static Optional<Block> getDisguise(Block block) {
         if (blocks == null) return Optional.empty();
         return Optional.ofNullable(blocks.get(block));
+    }
+
+    public static Optional<Float> getBreakSpeed(Block block, float originalSpeed) {
+        if (breakSpeedFactors == null) return Optional.empty();
+        return Optional.ofNullable(breakSpeedFactors.get(block)).map(it -> it * originalSpeed);
     }
 
 }
