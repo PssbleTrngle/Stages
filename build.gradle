@@ -32,9 +32,9 @@ allprojects {
     apply from: "https://files.latmod.com/public/markdown-git-changelog.gradle"
 
     def ENV = System.getenv()
-    version = "${mod_version}-build.${ENV.GITHUB_RUN_NUMBER ?: 9999}"
+    version = mod_version
     group = project.maven_group
-    archivesBaseName = project.archives_base_name
+    archivesBaseName = project.mod_id
 
     sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'
 

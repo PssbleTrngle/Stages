@@ -14,8 +14,9 @@ public class KubeJSStagesPlugin extends KubeJSPlugin {
 
     @Override
     public void addBindings(BindingsEvent event) {
+
         event.addFunction("addStage", args -> {
-            if(event.type != ScriptType.SERVER) return null;
+            if (event.type != ScriptType.SERVER) return null;
 
             var id = args[0].toString();
             var consumer = (StageBuilder.Consumer) args[1];
@@ -23,6 +24,18 @@ public class KubeJSStagesPlugin extends KubeJSPlugin {
             Stages.registerStage(id, stage);
             return null;
         }, null, StageBuilder.Consumer.class);
+
+        event.addFunction("isStageEnabled", args -> {
+            if (event.type != ScriptType.SERVER) return null;
+            var id = args[0].toString();
+            return !Stages.isDisabled(id);
+        }, null);
+
+        event.addFunction("isStageDisabled", args -> {
+            if (event.type != ScriptType.SERVER) return null;
+            var id = args[0].toString();
+            return Stages.isDisabled(id);
+        }, null);
 
     }
 

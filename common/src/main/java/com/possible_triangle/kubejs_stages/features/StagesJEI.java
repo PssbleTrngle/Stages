@@ -23,10 +23,17 @@ public class StagesJEI implements IModPlugin {
     public void onRuntimeAvailable(IJeiRuntime runtime) {
         var ingredients = runtime.getIngredientManager();
         Stages.onChangeOnce("jei", stage -> {
+
             if (!stage.stacks().isEmpty()) {
                 ingredients.removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, stage.stacks());
             }
+
+            stage.categories().forEach(id -> {
+                runtime.getRecipeManager().hideRecipeCategory(new ResourceLocation(id));
+            });
+
             PlatformJEI.handleStage(stage, runtime);
+
         });
     }
 

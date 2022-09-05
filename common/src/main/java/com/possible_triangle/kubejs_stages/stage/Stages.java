@@ -1,16 +1,15 @@
 package com.possible_triangle.kubejs_stages.stage;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.possible_triangle.kubejs_stages.KubeJSStages;
+import com.possible_triangle.kubejs_stages.StageConfig;
 import com.possible_triangle.kubejs_stages.network.StagesNetwork;
 import com.possible_triangle.kubejs_stages.network.SyncMessage;
 import dev.architectury.event.events.common.LifecycleEvent;
-import dev.latvian.mods.kubejs.recipe.RecipeEventJS;
-import dev.latvian.mods.kubejs.recipe.filter.OutputFilter;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 
@@ -18,7 +17,6 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 
 public class Stages {
@@ -27,50 +25,43 @@ public class Stages {
         LifecycleEvent.SERVER_STOPPED.register($ -> clear());
     }
 
-    public static void removeRecipes(RecipeEventJS event) {
-        definedStages.forEach((id, stage) -> {
-            stage.items().forEach(item -> {
-                event.remove(new OutputFilter(item, false));
-            });
-        });
-    }
-
-    private static final HashMap<String, Consumer<Stage>> CLIENT_LISTENERS = Maps.newHashMap();
+    private static final HashMap<String, Consumer<Stage>> LISTENERS = Maps.newHashMap();
 
     private static Map<String, Stage> definedStages = Collections.emptyMap();
     private static final HashMap<String, StageBuilder> LOADING_STAGES = Maps.newHashMap();
     private static Stage disabledContent = Stage.EMPTY;
 
-    private static final Set<String> DISABLED = Sets.newHashSet();
 
     private static final DynamicCommandExceptionType NOT_FOUND = new DynamicCommandExceptionType(id -> new TextComponent("stage does not exist: '" + id + "'"));
 
+    public static boolean isDisabled(String id) {
+        return StageConfig.instance().isDisabled(id);
+    }
+
     public static boolean enable(MinecraftServer server, String id) throws CommandSyntaxException {
         if (!definedStages.containsKey(id)) throw NOT_FOUND.create(id);
-        if (!DISABLED.contains(id)) return false;
-        DISABLED.remove(id);
+        StageConfig.instance().disable(id);
         updateDisabled(server);
         return true;
     }
 
     public static boolean disable(MinecraftServer server, String id) throws CommandSyntaxException {
         if (!definedStages.containsKey(id)) throw NOT_FOUND.create(id);
-        if (DISABLED.contains(id)) return false;
-        DISABLED.add(id);
+        StageConfig.instance().enable(id);
         updateDisabled(server);
         return true;
     }
 
     public static int disableAll(MinecraftServer server) {
-        var enabled = definedStages.keySet().stream().filter(it -> !DISABLED.contains(it)).toList();
-        DISABLED.addAll(enabled);
+        var enabled = definedStages.keySet().stream().filter(it -> !isDisabled(it)).toList();
+        enabled.forEach(it -> StageConfig.instance().disable(it));
         updateDisabled(server);
         return enabled.size();
     }
 
     public static int enableAll(MinecraftServer server) {
-        var disabled = definedStages.keySet().stream().filter(DISABLED::contains).toList();
-        DISABLED.clear();
+        var disabled = definedStages.keySet().stream().filter(Stages::isDisabled).toList();
+        disabled.forEach(it -> StageConfig.instance().enable(it));
         updateDisabled(server);
         return disabled.size();
     }
@@ -94,7 +85,7 @@ public class Stages {
 
     private static void updateDisabled(@Nullable MinecraftServer server) {
         disabledContent = definedStages.entrySet().stream()
-                .filter(it -> DISABLED.contains(it.getKey()))
+                .filter(it -> isDisabled(it.getKey()))
                 .map(Map.Entry::getValue)
                 .reduce(Stage.EMPTY, Stage::merge);
         if (server != null) server.getPlayerList().getPlayers().forEach(StagesNetwork::sync);
@@ -107,18 +98,18 @@ public class Stages {
     }
 
     public static void unsubscribe(String id) {
-        CLIENT_LISTENERS.remove(id);
+        LISTENERS.remove(id);
     }
 
     public static Runnable onChange(String id, Consumer<Stage> listener) {
-        CLIENT_LISTENERS.put(id, listener);
+        LISTENERS.put(id, listener);
         return () -> unsubscribe(id);
     }
 
     public static Runnable onChangeOnce(String id, Consumer<Stage> listener) {
         return onChange(id, stage -> {
-            listener.accept(stage);
             unsubscribe(id);
+            listener.accept(stage);
         });
     }
 
@@ -127,7 +118,8 @@ public class Stages {
     }
 
     public static void notifyListeners(Stage disabled) {
-        CLIENT_LISTENERS.values().forEach(listener -> {
+        var frozen = new ImmutableSet.Builder<Consumer<Stage>>().addAll(LISTENERS.values()).build();
+        frozen.forEach(listener -> {
             try {
                 listener.accept(disabled);
             } catch (Throwable e) {

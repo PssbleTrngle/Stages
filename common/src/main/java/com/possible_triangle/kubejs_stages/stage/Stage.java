@@ -11,10 +11,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public record Stage(Collection<IngredientJS> items, Collection<FluidStackJS> fluids,
+public record Stage(Collection<IngredientJS> items, Collection<FluidStackJS> fluids, Collection<String> categories,
                     Map<Block, Block> disguisedBlocks) {
 
-    public static final Stage EMPTY = new Stage(Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
+    public static final Stage EMPTY = new Stage(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
 
     public List<ItemStack> stacks() {
         return items().stream().flatMap(it -> it.getStacks().stream()).map(ItemStackJS::getItemStack).toList();
@@ -24,8 +24,13 @@ public record Stage(Collection<IngredientJS> items, Collection<FluidStackJS> flu
         return StageBuilder.create(builder -> {
             this.items().forEach(builder::addItem);
             other.items().forEach(builder::addItem);
+
             this.fluids().forEach(builder::addFluid);
             other.fluids().forEach(builder::addFluid);
+
+            this.categories().forEach(builder::addCategory);
+            other.categories().forEach(builder::addCategory);
+
             this.disguisedBlocks().forEach(builder::disguiseBlock);
             other.disguisedBlocks().forEach(builder::disguiseBlock);
         }).build();

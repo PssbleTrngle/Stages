@@ -22,7 +22,7 @@ public class BlockModelShaperMixin {
     private Map<BlockState, BakedModel> modelByStateCache;
 
     @Inject(at = @At("HEAD"), method = "getBlockModel(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/client/resources/model/BakedModel;", cancellable = true)
-    private void removeLockedRecipes(BlockState blockState, CallbackInfoReturnable<BakedModel> cir) {
+    private void overrideModel(BlockState blockState, CallbackInfoReturnable<BakedModel> cir) {
         StagesDisguises.getDisguise(blockState.getBlock())
                 .map(Block::defaultBlockState)
                 .map(modelByStateCache::get)

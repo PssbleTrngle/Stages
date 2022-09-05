@@ -23,11 +23,12 @@ public class StageBuilder {
     }
 
     public Stage build() {
-        return new Stage(items.build(), fluids.build(), disguisedBlocks.build());
+        return new Stage(items.build(), fluids.build(), categories.build(), disguisedBlocks.build());
     }
 
     private final ImmutableSet.Builder<IngredientJS> items = new ImmutableSet.Builder<>();
     private final ImmutableSet.Builder<FluidStackJS> fluids = new ImmutableSet.Builder<>();
+    private final ImmutableSet.Builder<String> categories = new ImmutableSet.Builder<>();
     private final ImmutableMap.Builder<Block, Block> disguisedBlocks = new ImmutableMap.Builder<>();
 
     public void addItem(IngredientJS ingredient) {
@@ -36,6 +37,10 @@ public class StageBuilder {
 
     public void addFluid(FluidStackJS fluid) {
         fluids.add(fluid);
+    }
+
+    public void addCategory(String id) {
+        categories.add(id);
     }
 
     public void disguiseBlock(Block block, Block as) {

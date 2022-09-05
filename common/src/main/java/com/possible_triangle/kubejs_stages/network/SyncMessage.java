@@ -1,6 +1,7 @@
 package com.possible_triangle.kubejs_stages.network;
 
 import com.google.common.collect.ImmutableMap;
+import com.possible_triangle.kubejs_stages.KubeJSStages;
 import com.possible_triangle.kubejs_stages.stage.Stage;
 import com.possible_triangle.kubejs_stages.stage.Stages;
 import dev.architectury.networking.NetworkManager;
@@ -46,6 +47,7 @@ public class SyncMessage {
 
         buf.writeCollection(stage.stacks().stream().map(ItemStack::getItem).toList(), writeEntry(itemRegistry));
         buf.writeCollection(stage.fluids().stream().map(FluidStackJS::getFluid).toList(), writeEntry(fluidRegistry));
+        buf.writeCollection(stage.categories(), FriendlyByteBuf::writeUtf);
         buf.writeMap(stage.disguisedBlocks(), writeEntry(blockRegistry), writeEntry(blockRegistry));
 
         return buf;
@@ -54,21 +56,26 @@ public class SyncMessage {
     public static Function<RegistryAccess, SyncMessage> decode(FriendlyByteBuf buf) {
         var items = buf.readList(b -> readEntry(b, Registry.ITEM_REGISTRY).andThen(IngredientJS::of));
         var fluids = buf.readList(b -> readEntry(b, Registry.FLUID_REGISTRY).andThen(FluidStackJS::of));
-        var blocks = buf.readMap(b -> readEntry(b, Registry.BLOCK_REGISTRY), b -> readEntry(b, Registry.BLOCK_REGISTRY));
+        var categories = buf.readList(FriendlyByteBuf::readUtf);
+        var disguisedBlocks = buf.readMap(b -> readEntry(b, Registry.BLOCK_REGISTRY), b -> readEntry(b, Registry.BLOCK_REGISTRY));
 
         return r -> {
             var resolvedItems = items.stream().map(it -> it.apply(r)).toList();
             var resolvedFluids = fluids.stream().map(it -> it.apply(r)).toList();
 
             var resolvedBlocks = new ImmutableMap.Builder<Block, Block>();
-            blocks.forEach((key, value) -> resolvedBlocks.put(key.apply(r), value.apply(r)));
+            disguisedBlocks.forEach((key, value) -> resolvedBlocks.put(key.apply(r), value.apply(r)));
 
-            var stage = new Stage(resolvedItems, resolvedFluids, resolvedBlocks.build());
+            var stage = new Stage(resolvedItems, resolvedFluids, categories, resolvedBlocks.build());
             return new SyncMessage(stage);
         };
     }
 
     public void handle(NetworkManager.PacketContext context) {
+        KubeJSStages.LOGGER.debug(
+                "Synced stage with {} items, {} fluids, {} categories, {} disguised blocks",
+                stage.items().size(), stage.fluids().size(), stage.categories().size(), stage.disguisedBlocks().size()
+        );
         Stages.notifyListeners(stage);
     }
 

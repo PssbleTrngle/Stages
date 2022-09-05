@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.possible_triangle.kubejs_stages.mixins.forge",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "PacketGetInfoMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
