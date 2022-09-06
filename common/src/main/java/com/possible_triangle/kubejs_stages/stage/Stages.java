@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class Stages {
 
@@ -31,8 +32,11 @@ public class Stages {
     private static final HashMap<String, StageBuilder> LOADING_STAGES = Maps.newHashMap();
     private static Stage disabledContent = Stage.EMPTY;
 
-
     private static final DynamicCommandExceptionType NOT_FOUND = new DynamicCommandExceptionType(id -> new TextComponent("stage does not exist: '" + id + "'"));
+
+    public static Stream<Map.Entry<String, Stage>> getDefinedStages() {
+        return definedStages.entrySet().stream();
+    }
 
     public static boolean isDisabled(String id) {
         return StageConfig.instance().isDisabled(id);

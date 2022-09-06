@@ -1,5 +1,6 @@
 package com.possible_triangle.kubejs_stages;
 
+import com.possible_triangle.kubejs_stages.command.StageCommand;
 import com.possible_triangle.kubejs_stages.features.StagesDisguises;
 import com.possible_triangle.kubejs_stages.network.StagesNetwork;
 import com.possible_triangle.kubejs_stages.stage.Stages;

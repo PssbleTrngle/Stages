@@ -1,7 +1,8 @@
-package com.possible_triangle.kubejs_stages;
+package com.possible_triangle.kubejs_stages.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.possible_triangle.kubejs_stages.stage.Stages;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -19,10 +20,14 @@ public class StageCommand {
         dispatcher.register(Commands.literal("stages").requires(permission()).then(
                         Commands.literal("enable").then(
                                 Commands.literal("*").executes(StageCommand::enableAll)
+                        ).then(
+                                Commands.argument("stage", new StageArgument()).executes(StageCommand::enable)
                         )
                 ).then(
                         Commands.literal("disable").then(
                                 Commands.literal("*").executes(StageCommand::disableAll)
+                        ).then(
+                                Commands.argument("stage", new StageArgument()).executes(StageCommand::disable)
                         )
                 )
         );
@@ -40,4 +45,15 @@ public class StageCommand {
         return disabled;
     }
 
+    private static int enable(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        var stage = StageArgument.get("stage", ctx);
+        var enabled = Stages.enable(ctx.getSource().getServer(), stage);
+        return enabled ? 1 : 0;
+    }
+
+    private static int disable(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        var stage = StageArgument.get("stage", ctx);
+        var disabled = Stages.disable(ctx.getSource().getServer(), stage);
+        return disabled ? 1 : 0;
+    }
 }
