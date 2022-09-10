@@ -1,5 +1,6 @@
-package com.possible_triangle.kubejs_stages.features;
+package com.possible_triangle.kubejs_stages.forge.features;
 
+import com.possible_triangle.kubejs_stages.features.StagesDisguises;
 import mcjty.theoneprobe.api.*;
 import mcjty.theoneprobe.apiimpl.providers.DefaultProbeInfoProvider;
 import mcjty.theoneprobe.config.Config;
