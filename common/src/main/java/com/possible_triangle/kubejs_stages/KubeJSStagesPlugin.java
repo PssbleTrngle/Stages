@@ -4,9 +4,12 @@ import com.possible_triangle.kubejs_stages.stage.StageBuilder;
 import com.possible_triangle.kubejs_stages.stage.Stages;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
-import dev.latvian.mods.kubejs.script.ScriptType;
+import net.minecraft.server.MinecraftServer;
+
+import java.util.function.Supplier;
 
 public class KubeJSStagesPlugin extends KubeJSPlugin {
+
     @Override
     public void init() {
         KubeJSStages.LOGGER.info("Loaded Stages Plugin");
@@ -14,9 +17,10 @@ public class KubeJSStagesPlugin extends KubeJSPlugin {
 
     @Override
     public void addBindings(BindingsEvent event) {
+        if (event.type.isClient()) return;
+        Supplier<MinecraftServer> server = KubeJSStages::getServer;
 
         event.addFunction("addStage", args -> {
-            if (event.type != ScriptType.SERVER) return null;
 
             var id = args[0].toString();
             var consumer = (StageBuilder.Consumer) args[1];
@@ -26,15 +30,13 @@ public class KubeJSStagesPlugin extends KubeJSPlugin {
         }, null, StageBuilder.Consumer.class);
 
         event.addFunction("isStageEnabled", args -> {
-            if (event.type != ScriptType.SERVER) return null;
             var id = args[0].toString();
-            return !Stages.isDisabled(id);
+            return !Stages.isDisabled(server.get(), id);
         }, null);
 
         event.addFunction("isStageDisabled", args -> {
-            if (event.type != ScriptType.SERVER) return null;
             var id = args[0].toString();
-            return Stages.isDisabled(id);
+            return Stages.isDisabled(server.get(), id);
         }, null);
 
     }

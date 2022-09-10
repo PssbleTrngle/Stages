@@ -5,8 +5,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.minecraft.server.MinecraftServer;
 
-import java.io.*;
+import javax.annotation.Nullable;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,7 +39,7 @@ public class StageConfig {
         } catch (IOException e) {
             KubeJSStages.LOGGER.warn("Error reading config '{}'", PATH);
         }
-        return new StageConfig();
+        return created;
     }
 
     private void write() {
@@ -53,7 +55,7 @@ public class StageConfig {
         }
     }
 
-    public static StageConfig instance() {
+    public static StageConfig instance(@Nullable MinecraftServer server) {
         if (instance == null) {
             KubeJSStages.LOGGER.info("Loading config");
             instance = read();

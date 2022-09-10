@@ -12,8 +12,8 @@ import com.possible_triangle.kubejs_stages.network.SyncMessage;
 import dev.architectury.event.events.common.LifecycleEvent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,40 +32,44 @@ public class Stages {
     private static final HashMap<String, StageBuilder> LOADING_STAGES = Maps.newHashMap();
     private static Stage disabledContent = Stage.EMPTY;
 
-    private static final DynamicCommandExceptionType NOT_FOUND = new DynamicCommandExceptionType(id -> new TextComponent("stage does not exist: '" + id + "'"));
+    private static final DynamicCommandExceptionType NOT_FOUND = new DynamicCommandExceptionType(id -> new TextComponent(String.format("stage does not exist: '%s'", id)));
 
     public static Stream<Map.Entry<String, Stage>> getDefinedStages() {
         return definedStages.entrySet().stream();
     }
 
-    public static boolean isDisabled(String id) {
-        return StageConfig.instance().isDisabled(id);
+    public static boolean isDisabled(@Nullable MinecraftServer server, String id) {
+        return StageConfig.instance(server).isDisabled(id);
+    }
+
+    public static boolean isEnabled(@Nullable MinecraftServer server, String id) {
+        return !isDisabled(server, id);
     }
 
     public static boolean enable(MinecraftServer server, String id) throws CommandSyntaxException {
         if (!definedStages.containsKey(id)) throw NOT_FOUND.create(id);
-        StageConfig.instance().disable(id);
+        var success = StageConfig.instance(server).disable(id);
         updateDisabled(server);
-        return true;
+        return success;
     }
 
     public static boolean disable(MinecraftServer server, String id) throws CommandSyntaxException {
         if (!definedStages.containsKey(id)) throw NOT_FOUND.create(id);
-        StageConfig.instance().enable(id);
+        var success = StageConfig.instance(server).disable(id);
         updateDisabled(server);
-        return true;
+        return success;
     }
 
     public static int disableAll(MinecraftServer server) {
-        var enabled = definedStages.keySet().stream().filter(it -> !isDisabled(it)).toList();
-        enabled.forEach(it -> StageConfig.instance().disable(it));
+        var enabled = definedStages.keySet().stream().filter(it -> isEnabled(server, it)).toList();
+        enabled.forEach(it -> StageConfig.instance(server).disable(it));
         updateDisabled(server);
         return enabled.size();
     }
 
     public static int enableAll(MinecraftServer server) {
-        var disabled = definedStages.keySet().stream().filter(Stages::isDisabled).toList();
-        disabled.forEach(it -> StageConfig.instance().enable(it));
+        var disabled = definedStages.keySet().stream().filter(it -> isDisabled(server, it)).toList();
+        disabled.forEach(it -> StageConfig.instance(server).enable(it));
         updateDisabled(server);
         return disabled.size();
     }
@@ -76,7 +80,7 @@ public class Stages {
         disabledContent = Stage.EMPTY;
     }
 
-    public static void finishLoad() {
+    public static void finishLoad(@Nullable MinecraftServer server) {
         var map = new ImmutableMap.Builder<String, Stage>();
         LOADING_STAGES.forEach((key, builder) -> map.put(key, builder.build()));
         LOADING_STAGES.clear();
@@ -84,12 +88,12 @@ public class Stages {
 
         KubeJSStages.LOGGER.info("Loaded {} stages", definedStages.size());
 
-        updateDisabled(null);
+        updateDisabled(server);
     }
 
     private static void updateDisabled(@Nullable MinecraftServer server) {
         disabledContent = definedStages.entrySet().stream()
-                .filter(it -> isDisabled(it.getKey()))
+                .filter(it -> isDisabled(server, it.getKey()))
                 .map(Map.Entry::getValue)
                 .reduce(Stage.EMPTY, Stage::merge);
         if (server != null) server.getPlayerList().getPlayers().forEach(StagesNetwork::sync);

@@ -36,7 +36,8 @@ public class StagesDisguises {
 
     public static Optional<Block> getDisguise(Block block) {
         if (blocks == null) return Optional.empty();
-        return Optional.ofNullable(blocks.get(block));
+        var disguise = blocks.get(block);
+        return Optional.ofNullable(disguise);
     }
 
     public static Optional<Float> getBreakSpeed(Block block, float originalSpeed) {

@@ -1,5 +1,6 @@
-package com.possible_triangle.kubejs_stages;
+package com.possible_triangle.kubejs_stages.fabric;
 
+import com.possible_triangle.kubejs_stages.KubeJSStages;
 import net.fabricmc.api.ModInitializer;
 
 public class KubeJSStagesFabric implements ModInitializer {
