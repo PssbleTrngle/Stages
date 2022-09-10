@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import dev.latvian.mods.kubejs.fluid.FluidStackJS;
 import dev.latvian.mods.kubejs.item.ingredient.IngredientJS;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 
 public class StageBuilder {
@@ -23,13 +24,14 @@ public class StageBuilder {
     }
 
     public Stage build() {
-        return new Stage(items.build(), fluids.build(), categories.build(), disguisedBlocks.build());
+        return new Stage(items.build(), fluids.build(), categories.build(), disguisedBlocks.build(), recipes.build());
     }
 
     private final ImmutableSet.Builder<IngredientJS> items = new ImmutableSet.Builder<>();
     private final ImmutableSet.Builder<FluidStackJS> fluids = new ImmutableSet.Builder<>();
     private final ImmutableSet.Builder<String> categories = new ImmutableSet.Builder<>();
     private final ImmutableMap.Builder<Block, Block> disguisedBlocks = new ImmutableMap.Builder<>();
+    private final ImmutableSet.Builder<ResourceLocation> recipes = new ImmutableSet.Builder<>();
 
     public void addItem(IngredientJS ingredient) {
         items.add(ingredient);
@@ -45,6 +47,10 @@ public class StageBuilder {
 
     public void disguiseBlock(Block block, Block as) {
         disguisedBlocks.put(block, as);
+    }
+
+    public void addRecipe(ResourceLocation id) {
+        recipes.add(id);
     }
 
 }

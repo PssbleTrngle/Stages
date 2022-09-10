@@ -48,7 +48,7 @@ public class Stages {
 
     public static boolean enable(MinecraftServer server, String id) throws CommandSyntaxException {
         if (!definedStages.containsKey(id)) throw NOT_FOUND.create(id);
-        var success = StageConfig.instance(server).disable(id);
+        var success = StageConfig.instance(server).enable(id);
         updateDisabled(server);
         return success;
     }

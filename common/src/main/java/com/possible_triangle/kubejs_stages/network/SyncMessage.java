@@ -12,6 +12,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
@@ -49,6 +50,7 @@ public class SyncMessage {
         buf.writeCollection(stage.fluids().stream().map(FluidStackJS::getFluid).toList(), writeEntry(fluidRegistry));
         buf.writeCollection(stage.categories(), FriendlyByteBuf::writeUtf);
         buf.writeMap(stage.disguisedBlocks(), writeEntry(blockRegistry), writeEntry(blockRegistry));
+        buf.writeCollection(stage.recipes(), (b, id) -> b.writeUtf(id.toString()));
 
         return buf;
     }
@@ -58,6 +60,7 @@ public class SyncMessage {
         var fluids = buf.readList(b -> readEntry(b, Registry.FLUID_REGISTRY).andThen(FluidStackJS::of));
         var categories = buf.readList(FriendlyByteBuf::readUtf);
         var disguisedBlocks = buf.readMap(b -> readEntry(b, Registry.BLOCK_REGISTRY), b -> readEntry(b, Registry.BLOCK_REGISTRY));
+        var recipes = buf.readList(b -> new ResourceLocation(b.readUtf()));
 
         return r -> {
             var resolvedItems = items.stream().map(it -> it.apply(r)).toList();
@@ -66,16 +69,13 @@ public class SyncMessage {
             var resolvedBlocks = new ImmutableMap.Builder<Block, Block>();
             disguisedBlocks.forEach((key, value) -> resolvedBlocks.put(key.apply(r), value.apply(r)));
 
-            var stage = new Stage(resolvedItems, resolvedFluids, categories, resolvedBlocks.build());
+            var stage = new Stage(resolvedItems, resolvedFluids, categories, resolvedBlocks.build(), recipes);
             return new SyncMessage(stage);
         };
     }
 
     public void handle(NetworkManager.PacketContext context) {
-        KubeJSStages.LOGGER.debug(
-                "Synced stage with {} items, {} fluids, {} categories, {} disguised blocks",
-                stage.items().size(), stage.fluids().size(), stage.categories().size(), stage.disguisedBlocks().size()
-        );
+        KubeJSStages.LOGGER.debug("Synced stage with {}", stage.info());
         Stages.notifyListeners(stage);
     }
 
