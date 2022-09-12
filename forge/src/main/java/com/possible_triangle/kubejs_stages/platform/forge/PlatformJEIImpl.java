@@ -5,8 +5,6 @@ import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import dev.latvian.mods.kubejs.fluid.FluidStackJS;
 import mezz.jei.api.forge.ForgeTypes;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluid;
 
 public class PlatformJEIImpl {
 

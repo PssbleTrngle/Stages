@@ -13,7 +13,7 @@ public class StagesDisguises {
     private static Map<Block, Float> breakSpeedFactors;
 
     public static void init() {
-        Stages.onChange("disguises", stage -> {
+        Stages.getAccess().onChange("disguises", stage -> {
             blocks = stage.disguisedBlocks();
 
             var disguises = new ImmutableMap.Builder<Block, Float>();
@@ -22,16 +22,6 @@ public class StagesDisguises {
             });
             breakSpeedFactors = disguises.build();
         });
-
-        /*
-        PlatformEvents.modifyBreakSpeed(event -> {
-            var block = event.getBlock();
-            var stage = Stages.getDisabledStages().stream().filter(it -> it.disguisedBlocks().containsKey(block)).findFirst();
-            return stage.map(it -> it.disguisedBlocks().get(block)).map(disguise -> {
-                return block.defaultDestroyTime() / disguise.defaultDestroyTime();
-            });
-        });
-        */
     }
 
     public static Optional<Block> getDisguise(Block block) {

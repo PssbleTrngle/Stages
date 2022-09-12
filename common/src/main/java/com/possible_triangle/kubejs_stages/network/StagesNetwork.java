@@ -12,8 +12,10 @@ public class StagesNetwork {
     private static final ResourceLocation SYNC_PACKET = new ResourceLocation(KubeJSStages.ID, "sync");
 
     public static void sync(ServerPlayer player) {
-        var packet = Stages.createSyncMessage();
-        NetworkManager.sendToPlayer(player, SYNC_PACKET, packet.encode(player.server.registryAccess()));
+        Stages.getServerAccess().ifPresent(stages -> {
+            var packet = stages.createSyncMessage();
+            NetworkManager.sendToPlayer(player, SYNC_PACKET, packet.encode(player.server.registryAccess()));
+        });
     }
 
     public static void init() {
