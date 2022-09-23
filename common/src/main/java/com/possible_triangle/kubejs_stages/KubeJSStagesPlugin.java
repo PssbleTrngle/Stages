@@ -2,6 +2,7 @@ package com.possible_triangle.kubejs_stages;
 
 import com.possible_triangle.kubejs_stages.stage.StageBuilder;
 import com.possible_triangle.kubejs_stages.stage.Stages;
+
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 
