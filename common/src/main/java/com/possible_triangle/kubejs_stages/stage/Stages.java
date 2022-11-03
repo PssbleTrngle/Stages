@@ -56,7 +56,7 @@ public class Stages {
     }
 
     public static StageContext clientContext() {
-        return new StageContext(null, Minecraft.getInstance().player);
+        return new StageContext(null, Minecraft.getInstance().player, false);
     }
 
     @FunctionalInterface

@@ -12,8 +12,8 @@ public class ClientStagesAccess extends StagesAccess {
     private Stage disabledContent = Stage.EMPTY;
 
     @Override
-    public boolean isEnabled(String id, StageContext context) {
-        return !disabledStages.contains(id);
+    public ThreeState getState(String id, StageContext context) {
+        return disabledStages.contains(id) ? ThreeState.DISABLED : ThreeState.ENABLED;
     }
 
     public void receiveSync(SyncMessage message) {

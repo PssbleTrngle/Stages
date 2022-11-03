@@ -58,15 +58,22 @@ public class ServerStagesAccess extends StagesAccess {
     }
 
     @Override
-    public boolean isEnabled(String id, StageContext context) {
-        if (!definedStages.containsKey(id)) return false;
+    public ThreeState getState(String id, StageContext context) {
+        if (!definedStages.containsKey(id)) return ThreeState.UNSET;
 
-        return Stream.of(StageScope.GLOBAL, StageScope.PLAYER)
+        var optionalState = Stream.of(StageScope.GLOBAL, StageScope.PLAYER)
                 .map(it -> it.getOptionalState(id, context))
                 .filter(it -> it != ThreeState.UNSET)
-                .findFirst()
-                .orElseGet(() -> definedStages.get(id).defaultState())
-                .asBoolean();
+                .findFirst();
+
+        return optionalState.orElseGet(() -> {
+            if (context.strict()) return ThreeState.UNSET;
+            else return getDefaultState(id);
+        });
+    }
+
+    public ThreeState getDefaultState(String id) {
+        return definedStages.get(id).defaultState();
     }
 
     public void clear() {
@@ -100,7 +107,7 @@ public class ServerStagesAccess extends StagesAccess {
     }
 
     public SyncMessage createSyncMessage(ServerPlayer player) {
-        var context = new StageContext(player.server, player);
+        var context = new StageContext(player.server, player, false);
         return new SyncMessage(getDisabledContent(context), getDisabledStages(context).toList());
     }
 }

@@ -10,14 +10,18 @@ import com.possible_triangle.kubejs_stages.KubeJSStages;
 public abstract class StagesAccess {
 
     @FunctionalInterface
-    public static interface UpdateEvent {
+    public interface UpdateEvent {
         void onUpdate(StagesAccess access);
     }
 
-    public abstract boolean isEnabled(String id, StageContext context);
+    public abstract ThreeState getState(String id, StageContext context);
+
+    public final boolean isEnabled(String id, StageContext context) {
+        return getState(id, context) == ThreeState.ENABLED;
+    }
 
     public final boolean isDisabled(String id, StageContext context) {
-        return !isEnabled(id, context);
+        return getState(id, context) == ThreeState.DISABLED;
     }
 
     private final HashMap<String, UpdateEvent> listeners = Maps.newHashMap();

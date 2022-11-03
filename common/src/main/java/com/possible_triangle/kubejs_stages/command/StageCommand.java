@@ -58,28 +58,28 @@ public class StageCommand {
         );
     }
 
-    private static Stream<StageContext> createContexts(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+    private static Stream<StageContext> createContexts(CommandContext<CommandSourceStack> commandContext, boolean strict) throws CommandSyntaxException {
         var server = commandContext.getSource().getServer();
         try {
             var players = EntityArgument.getPlayers(commandContext, "player");
-            return players.stream().map(it -> new StageContext(server, it));
+            return players.stream().map(it -> new StageContext(server, it, false));
         } catch (IllegalArgumentException ex) {
             var source = commandContext.getSource();
             if (source.getEntity() instanceof Player player) {
-                return Stream.of(new StageContext(server, player));
+                return Stream.of(new StageContext(server, player, strict));
             } else {
-                return Stream.of(new StageContext(server, null));
+                return Stream.of(new StageContext(server, null, strict));
             }
         }
     }
 
-    private static StageContext createContext(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
-        return createContexts(commandContext).findFirst().orElseThrow();
+    private static StageContext createContext(CommandContext<CommandSourceStack> commandContext, boolean strict) throws CommandSyntaxException {
+        return createContexts(commandContext, strict).findFirst().orElseThrow();
     }
 
     private static int list(CommandContext<CommandSourceStack> ctx, StagePredicate predicate) throws CommandSyntaxException {
         var access = Stages.getServerAccess().orElseThrow();
-        var context = createContext(ctx);
+        var context = createContext(ctx, false);
         var stages = access.getStages()
                 .filter(it -> predicate.test(access, it, context))
                 .toList();
@@ -92,15 +92,19 @@ public class StageCommand {
 
     private static int list(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         var access = Stages.getServerAccess().orElseThrow();
-        var context = createContext(ctx);
+        var context = createContext(ctx, true);
         var stages = access.getStages().toList();
         ctx.getSource().sendSuccess(new TextComponent(String.format("Found %s stages", stages.size())), false);
 
         stages.forEach(id -> {
-            var isDisabled = access.isDisabled(id, context);
-            var status = isDisabled ? "disabled" : "enabled";
-            var statusColor = isDisabled ? ChatFormatting.RED : ChatFormatting.GREEN;
-            ctx.getSource().sendSuccess(new TextComponent(String.format("   %s: ", id)).append(new TextComponent(status).withStyle(statusColor)), false);
+            var state = access.getState(id, context);
+            var status = switch (state) {
+                case ENABLED -> new TextComponent("enabled").withStyle(ChatFormatting.GREEN);
+                case DISABLED -> new TextComponent("disabled").withStyle(ChatFormatting.RED);
+                case UNSET -> new TextComponent("unset").withStyle(ChatFormatting.GRAY)
+                        .append(String.format(" (default: %s)", access.getDefaultState(id)));
+            };
+            ctx.getSource().sendSuccess(new TextComponent(String.format("   %s: ", id)).append(status), false);
         });
         return stages.size();
     }
@@ -108,7 +112,7 @@ public class StageCommand {
     private static Command<CommandSourceStack> setStates(ThreeState state, StageScope scope) {
         return ctx -> {
             var ids = Stages.getServerAccess().orElseThrow().getStages().toList();
-            var targets = createContexts(ctx).toList();
+            var targets = createContexts(ctx, false).toList();
             var affected = 0;
             for (var target : targets) {
                 var changed = scope.setStates(ids, state, target);
@@ -122,7 +126,7 @@ public class StageCommand {
     private static Command<CommandSourceStack> setState(ThreeState state, StageScope scope) {
         return ctx -> {
             var stage = StageArgument.get("stage", ctx);
-            var targets = createContexts(ctx).toList();
+            var targets = createContexts(ctx, false).toList();
             var affected = 0;
             for (var target : targets) {
                 var success = scope.setState(stage, state, target);

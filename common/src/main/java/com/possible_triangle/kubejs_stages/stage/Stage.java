@@ -4,10 +4,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import dev.latvian.mods.kubejs.fluid.FluidStackJS;
 import dev.latvian.mods.kubejs.item.ItemStackJS;
 import dev.latvian.mods.kubejs.item.ingredient.IngredientJS;
+import dev.latvian.mods.kubejs.recipe.filter.IDFilter;
+import dev.latvian.mods.kubejs.recipe.filter.OutputFilter;
+import dev.latvian.mods.kubejs.recipe.filter.RecipeFilter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -20,6 +25,13 @@ public record Stage(ThreeState defaultState, Collection<IngredientJS> items, Col
 
     public List<ItemStack> stacks() {
         return items().stream().flatMap(it -> it.getStacks().stream()).map(ItemStackJS::getItemStack).toList();
+    }
+
+    public Stream<RecipeFilter> recipeFilters() {
+        return Stream.of(
+                items().stream().map(item -> new OutputFilter(item, false)),
+                recipes().stream().map(IDFilter::new)
+        ).flatMap(Function.identity());
     }
 
     public Stage merge(Stage other) {
@@ -39,8 +51,8 @@ public record Stage(ThreeState defaultState, Collection<IngredientJS> items, Col
             this.recipes().forEach(builder::addRecipe);
             other.recipes().forEach(builder::addRecipe);
 
-            if(this.defaultState != ThreeState.UNSET) builder.setDefaultState(this.defaultState);
-            if(other.defaultState != ThreeState.UNSET) builder.setDefaultState(other.defaultState);
+            if (this.defaultState != ThreeState.UNSET) builder.setDefaultState(this.defaultState);
+            if (other.defaultState != ThreeState.UNSET) builder.setDefaultState(other.defaultState);
         }).build();
     }
 

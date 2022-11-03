@@ -32,7 +32,7 @@ public class StagesDisguises {
         var uuid = player == null ? GLOBAL : player.getUUID();
         synchronized (CACHE) {
             var disguises = CACHE.computeIfAbsent(uuid, $ -> {
-                var context = new StageContext(null, player);
+                var context = new StageContext(null, player, false);
                 return Stages.getAccess().getDisabledContent(context).disguisedBlocks();
             });
             var disguise = disguises.get(block);

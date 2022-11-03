@@ -14,8 +14,4 @@ public enum ThreeState {
     public static ThreeState of(boolean bool) {
         return bool ? ENABLED : DISABLED;
     }
-
-    public boolean asBoolean() {
-        return this == ENABLED;
-    }
 }
