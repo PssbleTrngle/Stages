@@ -1,22 +1,24 @@
 package com.possible_triangle.kubejs_stages.stage;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.possible_triangle.kubejs_stages.KubeJSStages;
-import com.possible_triangle.kubejs_stages.StageConfig;
 import com.possible_triangle.kubejs_stages.network.StagesNetwork;
 import com.possible_triangle.kubejs_stages.network.SyncMessage;
+
 import dev.architectury.event.events.common.LifecycleEvent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
+import net.minecraft.server.level.ServerPlayer;
 
 public class ServerStagesAccess extends StagesAccess {
 
@@ -25,68 +27,51 @@ public class ServerStagesAccess extends StagesAccess {
     }
 
     private Map<String, Stage> definedStages = Collections.emptyMap();
-    private final HashMap<String, StageBuilder> LOADING_STAGES = Maps.newHashMap();
-    private Stage disabledContent = Stage.EMPTY;
+    private final HashMap<String, StageBuilder> loadingStages = Maps.newHashMap();
 
-    @Override
-    public Stage getDisabledContent() {
-        return disabledContent;
-    }
-
-    private void updateDisabled() {
-        disabledContent = getStages()
-                .filter(it -> isDisabled(it.getKey()))
-                .map(Map.Entry::getValue)
-                .reduce(Stage.EMPTY, Stage::merge);
-        onUpdate();
-        notifyListeners(disabledContent);
+    void updateDisabled() {
+        syncToPlayers();
+        notifyListeners();
     }
 
     private static final DynamicCommandExceptionType NOT_FOUND = new DynamicCommandExceptionType(id -> new TextComponent(String.format("stage does not exist: '%s'", id)));
 
-    @Override
-    public Stream<Map.Entry<String, Stage>> getStages() {
-        return definedStages.entrySet().stream();
-    }
-
-    @Override
-    public boolean isDisabled(String id) {
-        return StageConfig.instance(null).isDisabled(id);
-    }
-
-
-    public boolean enable(String id) throws CommandSyntaxException {
+    public void assertExists(String id) throws CommandSyntaxException {
         if (!definedStages.containsKey(id)) throw NOT_FOUND.create(id);
-        var success = StageConfig.instance(getServer()).enable(id);
-        updateDisabled();
-        return success;
     }
 
-    public boolean disable(String id) throws CommandSyntaxException {
-        if (!definedStages.containsKey(id)) throw NOT_FOUND.create(id);
-        var success = StageConfig.instance(getServer()).disable(id);
-        updateDisabled();
-        return success;
+    public Stream<String> getStages() {
+        return definedStages.keySet().stream();
     }
 
-    public int disableAll() {
-        var enabled = definedStages.keySet().stream().filter(this::isEnabled).toList();
-        enabled.forEach(it -> StageConfig.instance(getServer()).disable(it));
-        updateDisabled();
-        return enabled.size();
+    @Override
+    public Stream<String> getDisabledStages(StageContext context) {
+        return getStages().filter(it -> isDisabled(it, context));
     }
 
-    public int enableAll() {
-        var disabled = definedStages.keySet().stream().filter(this::isDisabled).toList();
-        disabled.forEach(it -> StageConfig.instance(getServer()).enable(it));
-        updateDisabled();
-        return disabled.size();
+    @Override
+    public Stage getDisabledContent(StageContext context) {
+        return definedStages.entrySet().stream()
+                .filter(it -> isDisabled(it.getKey(), context))
+                .map(Map.Entry::getValue)
+                .reduce(Stage.EMPTY, Stage::merge);
+    }
+
+    @Override
+    public boolean isEnabled(String id, StageContext context) {
+        if (!definedStages.containsKey(id)) return false;
+
+        return Stream.of(StageScope.GLOBAL, StageScope.PLAYER)
+                .map(it -> it.getOptionalState(id, context))
+                .filter(it -> it != ThreeState.UNSET)
+                .findFirst()
+                .orElseGet(() -> definedStages.get(id).defaultState())
+                .asBoolean();
     }
 
     public void clear() {
-        LOADING_STAGES.clear();
+        loadingStages.clear();
         definedStages = Collections.emptyMap();
-        disabledContent = Stage.EMPTY;
     }
 
     private @Nullable MinecraftServer getServer() {
@@ -95,8 +80,8 @@ public class ServerStagesAccess extends StagesAccess {
 
     public void finishLoad() {
         var map = new ImmutableMap.Builder<String, Stage>();
-        LOADING_STAGES.forEach((key, builder) -> map.put(key, builder.build()));
-        LOADING_STAGES.clear();
+        loadingStages.forEach((key, builder) -> map.put(key, builder.build()));
+        loadingStages.clear();
         definedStages = map.build();
 
         KubeJSStages.LOGGER.info("Loaded {} stages", definedStages.size());
@@ -104,18 +89,18 @@ public class ServerStagesAccess extends StagesAccess {
         updateDisabled();
     }
 
-    @Override
-    protected void onUpdate() {
+    protected void syncToPlayers() {
         var server = getServer();
         if (server != null) server.getPlayerList().getPlayers().forEach(StagesNetwork::sync);
     }
 
     public void registerStage(String id, StageBuilder stage) {
         KubeJSStages.LOGGER.info("Registered stage '{}'", id);
-        LOADING_STAGES.put(id, stage);
+        loadingStages.put(id, stage);
     }
 
-    public SyncMessage createSyncMessage() {
-        return new SyncMessage(disabledContent, getDisabledStages().toList());
+    public SyncMessage createSyncMessage(ServerPlayer player) {
+        var context = new StageContext(player.server, player);
+        return new SyncMessage(getDisabledContent(context), getDisabledStages(context).toList());
     }
 }

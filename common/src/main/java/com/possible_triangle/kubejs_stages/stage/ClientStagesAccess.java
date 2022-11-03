@@ -1,11 +1,10 @@
 package com.possible_triangle.kubejs_stages.stage;
 
-import com.possible_triangle.kubejs_stages.network.SyncMessage;
-
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.stream.Stream;
+
+import com.possible_triangle.kubejs_stages.network.SyncMessage;
 
 public class ClientStagesAccess extends StagesAccess {
 
@@ -13,28 +12,24 @@ public class ClientStagesAccess extends StagesAccess {
     private Stage disabledContent = Stage.EMPTY;
 
     @Override
-    public boolean isDisabled(String id) {
-        return disabledStages.contains(id);
-    }
-
-    @Override
-    public Stream<Map.Entry<String, Stage>> getStages() {
-        return Stream.empty();
+    public boolean isEnabled(String id, StageContext context) {
+        return !disabledStages.contains(id);
     }
 
     public void receiveSync(SyncMessage message) {
         disabledContent = message.content;
         disabledStages = message.stages;
-        Stages.getAccess().notifyListeners(message.content);
+        Stages.getAccess().notifyListeners();
     }
 
     @Override
-    public Stage getDisabledContent() {
+    public Stream<String> getDisabledStages(StageContext context) {
+        return disabledStages.stream();
+    }
+
+    @Override
+    public Stage getDisabledContent(StageContext context) {
         return disabledContent;
     }
 
-    @Override
-    public Stream<String> getDisabledStages() {
-        return disabledStages.stream();
-    }
 }

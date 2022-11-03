@@ -1,5 +1,10 @@
 package com.possible_triangle.kubejs_stages.stage;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import dev.latvian.mods.kubejs.fluid.FluidStackJS;
 import dev.latvian.mods.kubejs.item.ItemStackJS;
 import dev.latvian.mods.kubejs.item.ingredient.IngredientJS;
@@ -7,15 +12,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-public record Stage(Collection<IngredientJS> items, Collection<FluidStackJS> fluids, Collection<String> categories,
+public record Stage(ThreeState defaultState, Collection<IngredientJS> items, Collection<FluidStackJS> fluids,
+                    Collection<String> categories,
                     Map<Block, Block> disguisedBlocks, Collection<ResourceLocation> recipes) {
 
-    public static final Stage EMPTY = new Stage(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList());
+    public static final Stage EMPTY = new Stage(ThreeState.UNSET, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList());
 
     public List<ItemStack> stacks() {
         return items().stream().flatMap(it -> it.getStacks().stream()).map(ItemStackJS::getItemStack).toList();
@@ -37,6 +38,9 @@ public record Stage(Collection<IngredientJS> items, Collection<FluidStackJS> flu
 
             this.recipes().forEach(builder::addRecipe);
             other.recipes().forEach(builder::addRecipe);
+
+            if(this.defaultState != ThreeState.UNSET) builder.setDefaultState(this.defaultState);
+            if(other.defaultState != ThreeState.UNSET) builder.setDefaultState(other.defaultState);
         }).build();
     }
 

@@ -13,7 +13,7 @@ public class StagesNetwork {
 
     public static void sync(ServerPlayer player) {
         Stages.getServerAccess().ifPresent(stages -> {
-            var packet = stages.createSyncMessage();
+            var packet = stages.createSyncMessage(player);
             NetworkManager.sendToPlayer(player, SYNC_PACKET, packet.encode(player.server.registryAccess()));
         });
     }

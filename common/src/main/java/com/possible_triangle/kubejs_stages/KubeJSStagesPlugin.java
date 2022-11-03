@@ -1,6 +1,7 @@
 package com.possible_triangle.kubejs_stages;
 
 import com.possible_triangle.kubejs_stages.stage.StageBuilder;
+import com.possible_triangle.kubejs_stages.stage.StageContext;
 import com.possible_triangle.kubejs_stages.stage.Stages;
 
 import dev.latvian.mods.kubejs.KubeJSPlugin;
@@ -26,14 +27,15 @@ public class KubeJSStagesPlugin extends KubeJSPlugin {
             return null;
         }, null, StageBuilder.Consumer.class);
 
+        // TODO additional player argument?
         event.addFunction("isStageEnabled", args -> {
             var id = args[0].toString();
-            return Stages.getAccess().isEnabled(id);
+            return Stages.getAccess().isEnabled(id, StageContext.EMPTY);
         });
 
         event.addFunction("isStageDisabled", args -> {
             var id = args[0].toString();
-            return Stages.getAccess().isDisabled(id);
+            return Stages.getAccess().isDisabled(id, StageContext.EMPTY);
         });
 
     }

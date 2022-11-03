@@ -3,20 +3,18 @@ package com.possible_triangle.kubejs_stages.mixins;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.possible_triangle.kubejs_stages.features.StagesDisguises;
+import com.possible_triangle.kubejs_stages.stage.StageScope;
 
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.server.level.ServerPlayer;
 
-@Mixin(Player.class)
-public class PlayerMixin {
+@Mixin(ServerPlayer.class)
+public class ServerPlayerMixin {
 
-    @Inject(at = @At("RETURN"), method = "getDestroySpeed(Lnet/minecraft/world/level/block/state/BlockState;)F", cancellable = true)
-    private void modifyBreakSpeed(BlockState blockState, CallbackInfoReturnable<Float> cir) {
-        var player = (Player) (Object) this;
-        StagesDisguises.getBreakSpeed(blockState.getBlock(), cir.getReturnValue(), player).ifPresent(cir::setReturnValue);
+    @Inject(at = @At("RETURN"), method = "restoreFrom")
+    private void restoreStageData(ServerPlayer oldPlayer, boolean bl, CallbackInfo ci) {
+        StageScope.restorePlayerData(oldPlayer, (ServerPlayer) (Object) (this));
     }
 
 

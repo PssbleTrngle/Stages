@@ -1,5 +1,9 @@
 package com.possible_triangle.kubejs_stages.command;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
+
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -8,12 +12,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.possible_triangle.kubejs_stages.stage.ServerStagesAccess;
 import com.possible_triangle.kubejs_stages.stage.Stages;
-import net.minecraft.commands.CommandSourceStack;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import net.minecraft.commands.CommandSourceStack;
 
 public class StageArgument implements ArgumentType<String> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "bar");
@@ -36,7 +36,6 @@ public class StageArgument implements ArgumentType<String> {
             Stages.getServerAccess()
                     .map(ServerStagesAccess::getStages)
                     .ifPresent(stages -> stages
-                            .map(Map.Entry::getKey)
                             .filter(it -> it.startsWith(start))
                             .forEach(builder::suggest)
                     );

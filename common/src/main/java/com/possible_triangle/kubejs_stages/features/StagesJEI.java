@@ -25,7 +25,8 @@ public class StagesJEI implements IModPlugin {
     @Override
     public void onRuntimeAvailable(IJeiRuntime runtime) {
         var ingredients = runtime.getIngredientManager();
-        Stages.getAccess().onChangeOnce("jei", stage -> {
+        Stages.getAccess().onChangeOnce("jei", access -> {
+            var stage = access.getDisabledContent(Stages.clientContext());
 
             if (!stage.stacks().isEmpty()) {
                 ingredients.removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, stage.stacks());

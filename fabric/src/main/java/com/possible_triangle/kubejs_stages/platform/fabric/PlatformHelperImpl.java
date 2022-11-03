@@ -1,14 +1,13 @@
 package com.possible_triangle.kubejs_stages.platform.fabric;
 
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 
-import java.util.Optional;
-import java.util.function.Function;
+public class PlatformHelperImpl {
 
-public class PlatformEventsImpl {
-
-    public static void modifyBreakSpeed(Function<BlockState, Optional<Float>> modifier) {
-        // No event?
+    public static CompoundTag getPersistentData(Player player) {
+        // TODO
+        return new CompoundTag();
     }
 
 }

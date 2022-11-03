@@ -1,61 +1,57 @@
 package com.possible_triangle.kubejs_stages.stage;
 
+import java.util.HashMap;
+import java.util.stream.Stream;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.possible_triangle.kubejs_stages.KubeJSStages;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
 public abstract class StagesAccess {
 
-    public abstract boolean isDisabled(String id);
-
-    public final boolean isEnabled(String id) {
-        return !isDisabled(id);
+    @FunctionalInterface
+    public static interface UpdateEvent {
+        void onUpdate(StagesAccess access);
     }
 
-    public abstract Stream<Map.Entry<String, Stage>> getStages();
+    public abstract boolean isEnabled(String id, StageContext context);
 
-    private final HashMap<String, Consumer<Stage>> listeners = Maps.newHashMap();
-
-
-    public abstract Stage getDisabledContent();
-
-    public Stream<String> getDisabledStages() {
-        return getStages().map(Map.Entry::getKey).filter(this::isDisabled);
+    public final boolean isDisabled(String id, StageContext context) {
+        return !isEnabled(id, context);
     }
+
+    private final HashMap<String, UpdateEvent> listeners = Maps.newHashMap();
+
+
+    public abstract Stream<String> getDisabledStages(StageContext context);
+
+    public abstract Stage getDisabledContent(StageContext context);
 
     public final void unsubscribe(String id) {
         listeners.remove(id);
     }
 
-    public final Runnable onChange(String id, Consumer<Stage> listener) {
+    public final Runnable onChange(String id, UpdateEvent listener) {
         listeners.put(id, listener);
         return () -> unsubscribe(id);
     }
 
-    public final Runnable onChangeOnce(String id, Consumer<Stage> listener) {
-        return onChange(id, stage -> {
+    public final Runnable onChangeOnce(String id, UpdateEvent listener) {
+        return onChange(id, it -> {
             unsubscribe(id);
-            listener.accept(stage);
+            listener.onUpdate(it);
         });
     }
 
-    protected final void notifyListeners(Stage disabled) {
-        var frozen = new ImmutableSet.Builder<Consumer<Stage>>().addAll(listeners.values()).build();
+    protected final void notifyListeners() {
+        var frozen = new ImmutableSet.Builder<UpdateEvent>().addAll(listeners.values()).build();
         frozen.forEach(listener -> {
             try {
-                listener.accept(disabled);
-            } catch (Throwable e) {
+                listener.onUpdate(this);
+            } catch (Exception e) {
                 KubeJSStages.LOGGER.error("Client Handler encountered exception: {}", e.getMessage());
             }
         });
-    }
-
-    protected void onUpdate() {
     }
 
 }
