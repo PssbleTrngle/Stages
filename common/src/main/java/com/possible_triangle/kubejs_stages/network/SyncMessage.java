@@ -1,10 +1,17 @@
 package com.possible_triangle.kubejs_stages.network;
 
+import java.util.Collection;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
 import com.google.common.collect.ImmutableMap;
 import com.possible_triangle.kubejs_stages.KubeJSStages;
 import com.possible_triangle.kubejs_stages.stage.ClientStagesAccess;
 import com.possible_triangle.kubejs_stages.stage.Stage;
 import com.possible_triangle.kubejs_stages.stage.Stages;
+
+import com.possible_triangle.kubejs_stages.stage.ThreeState;
+
 import dev.architectury.networking.NetworkManager;
 import dev.latvian.mods.kubejs.fluid.FluidStackJS;
 import dev.latvian.mods.kubejs.item.ingredient.IngredientJS;
@@ -16,10 +23,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-
-import java.util.Collection;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public class SyncMessage {
 
@@ -77,7 +80,7 @@ public class SyncMessage {
             var resolvedBlocks = new ImmutableMap.Builder<Block, Block>();
             disguisedBlocks.forEach((key, value) -> resolvedBlocks.put(key.apply(r), value.apply(r)));
 
-            var content = new Stage(resolvedItems, resolvedFluids, categories, resolvedBlocks.build(), recipes);
+            var content = new Stage(ThreeState.UNSET, resolvedItems, resolvedFluids, categories, resolvedBlocks.build(), recipes);
             return new SyncMessage(content, stages);
         };
     }

@@ -24,7 +24,7 @@ public class StageBuilder {
     }
 
     public Stage build() {
-        return new Stage(items.build(), fluids.build(), categories.build(), disguisedBlocks.build(), recipes.build());
+        return new Stage(defaultState, items.build(), fluids.build(), categories.build(), disguisedBlocks.build(), recipes.build());
     }
 
     private final ImmutableSet.Builder<IngredientJS> items = new ImmutableSet.Builder<>();
@@ -32,6 +32,22 @@ public class StageBuilder {
     private final ImmutableSet.Builder<String> categories = new ImmutableSet.Builder<>();
     private final ImmutableMap.Builder<Block, Block> disguisedBlocks = new ImmutableMap.Builder<>();
     private final ImmutableSet.Builder<ResourceLocation> recipes = new ImmutableSet.Builder<>();
+
+    private ThreeState defaultState = ThreeState.UNSET;
+
+    public void enabledByDefault() {
+        setDefaultState(true);
+    }
+
+    public void disabledByDefault() {
+        setDefaultState(false);
+    }
+    public void setDefaultState(boolean value) {
+        setDefaultState(ThreeState.of(value));
+    }
+    public void setDefaultState(ThreeState state) {
+        defaultState = state;
+    }
 
     public void addItem(IngredientJS ingredient) {
         items.add(ingredient);

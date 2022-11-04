@@ -1,22 +1,24 @@
 package com.possible_triangle.kubejs_stages;
 
-import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import net.minecraft.server.MinecraftServer;
-
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Set;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.possible_triangle.kubejs_stages.stage.ThreeState;
+
+import net.minecraft.server.MinecraftServer;
 
 public class StageConfig {
 
-    private final Set<String> disabled = Sets.newHashSet();
+    private final Map<String, ThreeState> states = Maps.newHashMap();
 
     private static StageConfig instance = null;
 
@@ -34,8 +36,13 @@ public class StageConfig {
 
         try {
             var json = GSON.fromJson(Files.readString(PATH), JsonObject.class);
-            var list = json.getAsJsonArray("disabledStages");
-            list.forEach(it -> created.disabled.add(it.getAsString()));
+            var list = json.getAsJsonObject("stages");
+            if (list != null) {
+                list.entrySet().forEach(e -> {
+                    var state = ThreeState.valueOf(e.getValue().getAsString().toUpperCase());
+                    created.states.put(e.getKey(), state);
+                });
+            }
         } catch (IOException e) {
             KubeJSStages.LOGGER.warn("Error reading config '{}'", PATH);
         }
@@ -45,9 +52,11 @@ public class StageConfig {
     private void write() {
         try {
             var json = new JsonObject();
-            var list = new JsonArray();
-            disabled.forEach(list::add);
-            json.add("disabledStages", list);
+            var statesMap = new JsonObject();
+            states.forEach((id, state) -> {
+                if (state == ThreeState.UNSET) return;
+                statesMap.addProperty(id, state.name().toLowerCase());
+            });
 
             Files.writeString(PATH, GSON.toJson(json));
         } catch (IOException e) {
@@ -63,20 +72,13 @@ public class StageConfig {
         return instance;
     }
 
-    public boolean isDisabled(String id) {
-        return disabled.contains(id);
+    public ThreeState getState(String id) {
+        return states.getOrDefault(id, ThreeState.UNSET);
     }
 
-    public boolean enable(String id) {
-        if (!disabled.contains(id)) return false;
-        disabled.remove(id);
-        write();
-        return true;
-    }
-
-    public boolean disable(String id) {
-        if (disabled.contains(id)) return false;
-        disabled.add(id);
+    public boolean setState(String id, ThreeState state) {
+        if (getState(id) == state) return false;
+        states.put(id, state);
         write();
         return true;
     }
