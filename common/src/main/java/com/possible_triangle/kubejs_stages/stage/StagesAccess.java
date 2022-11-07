@@ -1,7 +1,13 @@
 package com.possible_triangle.kubejs_stages.stage;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -11,7 +17,8 @@ public abstract class StagesAccess {
 
     @FunctionalInterface
     public interface UpdateEvent {
-        void onUpdate(StagesAccess access);
+        @Nullable
+        Runnable onUpdate(StagesAccess access);
     }
 
     public abstract ThreeState getState(String id, StageContext context);
@@ -25,6 +32,7 @@ public abstract class StagesAccess {
     }
 
     private final HashMap<String, UpdateEvent> listeners = Maps.newHashMap();
+    private List<Runnable> cleanup = Collections.emptyList();
 
 
     public abstract Stream<String> getDisabledStages(StageContext context);
@@ -33,6 +41,13 @@ public abstract class StagesAccess {
 
     public final void unsubscribe(String id) {
         listeners.remove(id);
+    }
+
+    public final Runnable onChange(String id, Consumer<StagesAccess> listener) {
+        return onChange(id, it -> {
+            listener.accept(it);
+            return null;
+        });
     }
 
     public final Runnable onChange(String id, UpdateEvent listener) {
@@ -49,13 +64,17 @@ public abstract class StagesAccess {
 
     protected final void notifyListeners() {
         var frozen = new ImmutableSet.Builder<UpdateEvent>().addAll(listeners.values()).build();
-        frozen.forEach(listener -> {
+        KubeJSStages.LOGGER.debug("Cleaning up {} handlers", cleanup.size());
+        KubeJSStages.LOGGER.debug("Notifying {} handlers", frozen.size());
+        cleanup.forEach(Runnable::run);
+        cleanup = frozen.stream().map(listener -> {
             try {
-                listener.onUpdate(this);
+                return listener.onUpdate(this);
             } catch (Exception e) {
-                KubeJSStages.LOGGER.error("Client Handler encountered exception: {}", e.getMessage());
+                KubeJSStages.LOGGER.error("Update Handler encountered exception: {}", e.getMessage());
+                return null;
             }
-        });
+        }).filter(Objects::nonNull).toList();
     }
 
 }

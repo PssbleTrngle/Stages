@@ -19,7 +19,7 @@ public class ClientStagesAccess extends StagesAccess {
     public void receiveSync(SyncMessage message) {
         disabledContent = message.content;
         disabledStages = message.stages;
-        Stages.getAccess().notifyListeners();
+        Stages.requireAccess().notifyListeners();
     }
 
     @Override

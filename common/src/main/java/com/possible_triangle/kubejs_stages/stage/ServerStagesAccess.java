@@ -91,7 +91,7 @@ public class ServerStagesAccess extends StagesAccess {
         loadingStages.clear();
         definedStages = map.build();
 
-        KubeJSStages.LOGGER.info("Loaded {} stages", definedStages.size());
+        KubeJSStages.LOGGER.debug("Loaded {} stages", definedStages.size());
 
         updateDisabled();
     }
@@ -102,7 +102,7 @@ public class ServerStagesAccess extends StagesAccess {
     }
 
     public void registerStage(String id, StageBuilder stage) {
-        KubeJSStages.LOGGER.info("Registered stage '{}'", id);
+        KubeJSStages.LOGGER.debug("Registered stage '{}'", id);
         loadingStages.put(id, stage);
     }
 

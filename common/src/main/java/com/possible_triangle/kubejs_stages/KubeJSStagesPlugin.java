@@ -11,7 +11,7 @@ public class KubeJSStagesPlugin extends KubeJSPlugin {
 
     @Override
     public void init() {
-        KubeJSStages.LOGGER.info("Loaded Stages Plugin");
+        KubeJSStages.LOGGER.debug("Loaded Stages Plugin");
     }
 
     @Override
@@ -30,12 +30,12 @@ public class KubeJSStagesPlugin extends KubeJSPlugin {
         // TODO additional player argument?
         event.addFunction("isStageEnabled", args -> {
             var id = args[0].toString();
-            return Stages.getAccess().isEnabled(id, StageContext.EMPTY);
+            return Stages.requireAccess().isEnabled(id, StageContext.EMPTY);
         });
 
         event.addFunction("isStageDisabled", args -> {
             var id = args[0].toString();
-            return Stages.getAccess().isDisabled(id, StageContext.EMPTY);
+            return Stages.requireAccess().isDisabled(id, StageContext.EMPTY);
         });
 
     }

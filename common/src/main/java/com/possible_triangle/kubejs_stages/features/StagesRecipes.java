@@ -13,10 +13,12 @@ public class StagesRecipes {
             var context = new StageContext(null, null, true);
             var stage = disabled.getDisabledContent(context);
 
-            KubeJSStages.LOGGER.info("Removing recipes of disabled stages for {} items", stage.items().size());
-            KubeJSStages.LOGGER.info("Removing {} recipes by ID", stage.recipes().size());
+            KubeJSStages.LOGGER.debug("Removing recipes of disabled stages for {} items", stage.items().size());
+            KubeJSStages.LOGGER.debug("Removing {} recipes by ID", stage.recipes().size());
 
             stage.recipeFilters().forEach(recipes::remove);
+
+            return null;
         });
     }
 

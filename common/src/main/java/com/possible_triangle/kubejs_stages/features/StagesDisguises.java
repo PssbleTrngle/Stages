@@ -21,7 +21,7 @@ public class StagesDisguises {
     private static final HashMap<UUID, Map<Block, Block>> CACHE = Maps.newHashMap();
 
     public static void init() {
-        Stages.getAccess().onChange("disguises", access -> {
+        Stages.requireAccess().onChange("disguises", access -> {
             synchronized (CACHE) {
                 CACHE.clear();
             }
@@ -30,13 +30,13 @@ public class StagesDisguises {
 
     public static Optional<Block> getDisguise(Block block, @Nullable Player player) {
         var uuid = player == null ? GLOBAL : player.getUUID();
+        var access = Stages.getAccess();
         synchronized (CACHE) {
             var disguises = CACHE.computeIfAbsent(uuid, $ -> {
                 var context = new StageContext(null, player, false);
-                return Stages.getAccess().getDisabledContent(context).disguisedBlocks();
+                return access.map(it -> it.getDisabledContent(context).disguisedBlocks()).orElse(null);
             });
-            var disguise = disguises.get(block);
-            return Optional.ofNullable(disguise);
+            return Optional.ofNullable(disguises).map(it -> it.get(block));
         }
     }
 

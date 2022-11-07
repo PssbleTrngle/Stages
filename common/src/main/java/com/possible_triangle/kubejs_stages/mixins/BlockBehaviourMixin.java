@@ -22,7 +22,7 @@ public class BlockBehaviourMixin {
 
     @Inject(at = @At("HEAD"), method = "getDrops(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/storage/loot/LootContext$Builder;)Ljava/util/List;", cancellable = true)
     private void replaceLoot(BlockState blockState, LootContext.Builder builder, CallbackInfoReturnable<List<ItemStack>> cir) {
-        var entity = builder.create(LootContextParamSets.BLOCK).getParamOrNull(LootContextParams.THIS_ENTITY);
+        var entity = builder.withParameter(LootContextParams.BLOCK_STATE, blockState).create(LootContextParamSets.BLOCK).getParamOrNull(LootContextParams.THIS_ENTITY);
         var player = entity instanceof Player it ? it : null;
         var disguise = StagesDisguises.getDisguise(blockState.getBlock(), player);
         disguise.ifPresent(as -> {
