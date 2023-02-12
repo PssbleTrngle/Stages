@@ -66,7 +66,7 @@ public class StageConfig {
 
     public static StageConfig instance(@Nullable MinecraftServer server) {
         if (instance == null) {
-            KubeJSStages.LOGGER.info("Loading config");
+            KubeJSStages.LOGGER.debug("Loading config");
             instance = read();
         }
         return instance;

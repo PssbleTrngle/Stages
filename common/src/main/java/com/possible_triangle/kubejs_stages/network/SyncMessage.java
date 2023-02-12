@@ -87,7 +87,7 @@ public class SyncMessage {
 
     public void handle(NetworkManager.PacketContext context) {
         KubeJSStages.LOGGER.debug("Synced stage with {}", content.info());
-        if (Stages.getAccess() instanceof ClientStagesAccess access) {
+        if (Stages.requireAccess() instanceof ClientStagesAccess access) {
             access.receiveSync(this);
         }
     }

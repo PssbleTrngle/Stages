@@ -1,6 +1,7 @@
 package com.possible_triangle.kubejs_stages.platform.fabric;
 
 import com.possible_triangle.kubejs_stages.stage.Stage;
+
 import mezz.jei.api.runtime.IJeiRuntime;
 
 public class PlatformJEIImpl {

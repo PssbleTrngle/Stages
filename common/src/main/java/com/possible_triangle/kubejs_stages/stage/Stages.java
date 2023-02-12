@@ -1,6 +1,5 @@
 package com.possible_triangle.kubejs_stages.stage;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -35,9 +34,13 @@ public class Stages {
         StagesDisguises.init();
     }
 
-    public static StagesAccess getAccess() {
-        if (clientAccess != null) return clientAccess;
-        return Objects.requireNonNull(serverAccess);
+    public static StagesAccess requireAccess() {
+        return getAccess().orElseThrow(() -> new NullPointerException("StageAccess not initialized"));
+    }
+
+    public static Optional<StagesAccess> getAccess() {
+        if (clientAccess != null) return Optional.of(clientAccess);
+        return Optional.ofNullable(serverAccess);
     }
 
     public static Optional<ServerStagesAccess> getServerAccess() {
