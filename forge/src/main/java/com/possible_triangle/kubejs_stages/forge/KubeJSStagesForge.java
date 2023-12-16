@@ -18,6 +18,7 @@ import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 
@@ -26,17 +27,17 @@ public class KubeJSStagesForge {
     private static final DeferredRegister<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPES = DeferredRegister.create(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, KubeJSStages.ID);
 
     public KubeJSStagesForge() {
-        KubeJSStages.init();
-        COMMAND_ARGUMENT_TYPES.register("stage", () ->
-                ArgumentTypeInfos.registerByClass(StageArgument.class, SingletonArgumentInfo.contextFree(StageArgument::new)));
-        COMMAND_ARGUMENT_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
-
         var modBus = FMLJavaModLoadingContext.get().getModEventBus();
         var forgeBus = MinecraftForge.EVENT_BUS;
 
+        COMMAND_ARGUMENT_TYPES.register("stage", () ->
+                ArgumentTypeInfos.registerByClass(StageArgument.class, SingletonArgumentInfo.contextFree(StageArgument::new)));
+
         COMMAND_ARGUMENT_TYPES.register(modBus);
 
-        ForgeNetwork.register(forgeBus);
+        modBus.addListener((FMLCommonSetupEvent event) -> {
+            ForgeNetwork.register(forgeBus);
+        });
 
         forgeBus.addListener((ServerAboutToStartEvent event) -> {
             Stages.initServer(event.getServer());

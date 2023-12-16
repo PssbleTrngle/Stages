@@ -15,5 +15,6 @@
   "server": [],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "refmap": "${mod_id}.refmap.json"
 }

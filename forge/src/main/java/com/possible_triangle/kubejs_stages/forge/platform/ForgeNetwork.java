@@ -15,12 +15,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 public class ForgeNetwork implements INetwork {
 
     private static final String PROTOCOL_VERSION = "1";
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(KubeJSStages.ID, "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
+    private static SimpleChannel CHANNEL;
 
     @Override
     public void send(ServerPlayer player, SyncMessage message) {
@@ -28,6 +23,13 @@ public class ForgeNetwork implements INetwork {
     }
 
     public static void register(IEventBus forgeBus) {
+        CHANNEL = NetworkRegistry.newSimpleChannel(
+                new ResourceLocation(KubeJSStages.ID, "main"),
+                () -> PROTOCOL_VERSION,
+                PROTOCOL_VERSION::equals,
+                PROTOCOL_VERSION::equals
+        );
+
         CHANNEL.registerMessage(0, SyncMessage.class, SyncMessage::encode, SyncMessage::decode, (msg, supplier) -> {
            var ctx = supplier.get();
            ctx.enqueueWork(msg::handle);

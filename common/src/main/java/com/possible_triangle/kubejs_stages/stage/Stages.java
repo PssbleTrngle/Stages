@@ -10,7 +10,7 @@ import java.util.Optional;
 public class Stages {
 
     private static StagesAccess clientAccess = null;
-    private static ServerStagesAccess serverAccess = null;
+    private static ServerStagesAccess serverAccess = new ServerStagesAccess();
 
     public static void initClient() {
         clientAccess = new ClientStagesAccess();
@@ -22,8 +22,7 @@ public class Stages {
     }
 
     public static void initServer(MinecraftServer server) {
-        serverAccess = new ServerStagesAccess(server);
-        registerListeners();
+        getServerAccess().ifPresent(it -> it.setServer(server));
     }
 
     public static void clearServer() {

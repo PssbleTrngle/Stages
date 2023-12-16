@@ -3,15 +3,22 @@ package com.possible_triangle.kubejs_stages;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonSyntaxException;
+import com.mojang.datafixers.util.Pair;
+import com.possible_triangle.kubejs_stages.platform.FluidStack;
+import com.possible_triangle.kubejs_stages.stage.StageBuilder;
+import com.possible_triangle.kubejs_stages.stage.Stages;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.block.Blocks;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class StageReloadListener extends SimpleJsonResourceReloadListener {
 
@@ -23,10 +30,63 @@ public class StageReloadListener extends SimpleJsonResourceReloadListener {
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> loaded, ResourceManager manager, ProfilerFiller profiler) {
-        StagesApi.addStage("test", builder -> {
-            builder.addItem(Ingredient.of(Items.DIAMOND));
-            builder.addRecipe(new ResourceLocation("diamond_pickaxe"));
-            builder.disguiseBlock(Blocks.DIAMOND_ORE, Blocks.STONE);
+        Stages.getServerAccess().ifPresent(access -> {
+            loaded.forEach((id, json) -> {
+                decode(json).ifPresent(stage -> {
+                    access.registerStage(id.toString(), stage);
+                });
+            });
+
+            access.finishLoad();
         });
+    }
+
+    private static Optional<StageBuilder> decode(JsonElement element) {
+        var json = element.getAsJsonObject();
+
+        var stage = StageBuilder.create(builder -> {
+            if (json.has("defaultState")) {
+                builder.setDefaultState(json.get("defaultState").getAsBoolean());
+            }
+
+            if (json.has("items")) json.getAsJsonArray("items").forEach(it ->
+                    tryDecode(() -> Ingredient.fromJson(it))
+                            .ifPresent(builder::addItem)
+            );
+
+            if (json.has("fluids")) json.getAsJsonArray("fluids").forEach(it ->
+                    tryDecode(() -> FluidStack.fromJson(it))
+                            .ifPresent(builder::addFluid)
+            );
+
+            if (json.has("categories")) json.getAsJsonArray("categories").forEach(it ->
+                    tryDecode(it::getAsString)
+                            .ifPresent(builder::addCategory)
+            );
+
+            if (json.has("blocks")) json.getAsJsonObject("blocks").entrySet().forEach(it ->
+                    tryDecode(() -> {
+                                var disguised = Registry.BLOCK.getOrThrow(ResourceKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(it.getKey())));
+                                var disguise = Registry.BLOCK.getOrThrow(ResourceKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(it.getValue().getAsString())));
+                                return new Pair<>(disguised, disguise);
+                            }
+                    ).ifPresent(pair -> builder.disguiseBlock(pair.getFirst(), pair.getSecond()))
+            );
+
+            if (json.has("recipes")) json.getAsJsonArray("recipes").forEach(it ->
+                    tryDecode(() -> new ResourceLocation(it.getAsString()))
+                            .ifPresent(builder::addRecipe)
+            );
+        });
+
+        return Optional.of(stage);
+    }
+
+    private static <T> Optional<T> tryDecode(Supplier<T> decoder) {
+        try {
+            return Optional.of(decoder.get());
+        } catch (JsonSyntaxException | IllegalStateException ignored) {
+            return Optional.empty();
+        }
     }
 }

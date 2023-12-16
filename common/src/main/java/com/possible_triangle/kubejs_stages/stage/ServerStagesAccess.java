@@ -20,10 +20,11 @@ import java.util.stream.Stream;
 public class ServerStagesAccess extends StagesAccess {
 
     @Nullable
-    private final MinecraftServer server;
+    private  MinecraftServer server;
 
-    public ServerStagesAccess(MinecraftServer server) {
+    public void setServer(MinecraftServer server) {
         this.server = server;
+        if(server == null) clear();
     }
 
     private Map<String, Stage> definedStages = Collections.emptyMap();
