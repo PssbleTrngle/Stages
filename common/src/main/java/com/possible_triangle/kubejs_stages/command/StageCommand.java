@@ -16,15 +16,16 @@ import com.possible_triangle.kubejs_stages.stage.StagesAccess;
 import com.possible_triangle.kubejs_stages.stage.ThreeState;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
 public class StageCommand {
 
-    private static final Dynamic2CommandExceptionType ALREADY_STATE = new Dynamic2CommandExceptionType((a, b) -> new TextComponent(String.format("%s is already %s", a, b)));
+    private static final Dynamic2CommandExceptionType ALREADY_STATE = new Dynamic2CommandExceptionType((a, b) -> Component.literal(String.format("%s is already %s", a, b)));
 
     private static Predicate<CommandSourceStack> permission() {
         return it -> it.hasPermission(3);
@@ -43,7 +44,7 @@ public class StageCommand {
         );
     }
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, Commands.CommandSelection selection) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("stages").requires(permission())
                 .then(stateNode(ThreeState.ENABLED))
                 .then(stateNode(ThreeState.DISABLED))
@@ -86,7 +87,7 @@ public class StageCommand {
 
         var ids = String.join(", ", stages);
         var size = stages.size();
-        ctx.getSource().sendSuccess(new TextComponent(String.format("%s disabled stages: %s", size, ids)), false);
+        ctx.getSource().sendSuccess(Component.literal(String.format("%s disabled stages: %s", size, ids)), false);
         return size;
     }
 
@@ -94,17 +95,17 @@ public class StageCommand {
         var access = Stages.getServerAccess().orElseThrow();
         var context = createContext(ctx, true);
         var stages = access.getStages().toList();
-        ctx.getSource().sendSuccess(new TextComponent(String.format("Found %s stages", stages.size())), false);
+        ctx.getSource().sendSuccess(Component.literal(String.format("Found %s stages", stages.size())), false);
 
         stages.forEach(id -> {
             var state = access.getState(id, context);
             var status = switch (state) {
-                case ENABLED -> new TextComponent("enabled").withStyle(ChatFormatting.GREEN);
-                case DISABLED -> new TextComponent("disabled").withStyle(ChatFormatting.RED);
-                case UNSET -> new TextComponent("unset").withStyle(ChatFormatting.GRAY)
+                case ENABLED -> Component.literal("enabled").withStyle(ChatFormatting.GREEN);
+                case DISABLED -> Component.literal("disabled").withStyle(ChatFormatting.RED);
+                case UNSET -> Component.literal("unset").withStyle(ChatFormatting.GRAY)
                         .append(String.format(" (default: %s)", access.getDefaultState(id)));
             };
-            ctx.getSource().sendSuccess(new TextComponent(String.format("   %s: ", id)).append(status), false);
+            ctx.getSource().sendSuccess(Component.literal(String.format("   %s: ", id)).append(status), false);
         });
         return stages.size();
     }
@@ -118,7 +119,7 @@ public class StageCommand {
                 var changed = scope.setStates(ids, state, target);
                 if (changed > 0) affected++;
             }
-            ctx.getSource().sendSuccess(new TextComponent("Updated stages for " + affected + " players"), true);
+            ctx.getSource().sendSuccess(Component.literal("Updated stages for " + affected + " players"), true);
             return affected;
         };
     }
@@ -133,7 +134,7 @@ public class StageCommand {
                 if (success) affected++;
             }
             if (affected == 0) throw ALREADY_STATE.create(stage, state.name());
-            ctx.getSource().sendSuccess(new TextComponent(String.format("Successfully set state of %s to %s for %s players", stage, state.name(), affected)), true);
+            ctx.getSource().sendSuccess(Component.literal(String.format("Successfully set state of %s to %s for %s players", stage, state.name(), affected)), true);
             return 1;
         };
     }

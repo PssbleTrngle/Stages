@@ -1,37 +1,25 @@
 package com.possible_triangle.kubejs_stages.stage;
 
+import com.possible_triangle.kubejs_stages.platform.FluidStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Block;
+
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
-import dev.latvian.mods.kubejs.fluid.FluidStackJS;
-import dev.latvian.mods.kubejs.item.ItemStackJS;
-import dev.latvian.mods.kubejs.item.ingredient.IngredientJS;
-import dev.latvian.mods.kubejs.recipe.filter.IDFilter;
-import dev.latvian.mods.kubejs.recipe.filter.OutputFilter;
-import dev.latvian.mods.kubejs.recipe.filter.RecipeFilter;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-
-public record Stage(ThreeState defaultState, Collection<IngredientJS> items, Collection<FluidStackJS> fluids,
+public record Stage(ThreeState defaultState, Collection<Ingredient> items, Collection<FluidStack> fluids,
                     Collection<String> categories,
                     Map<Block, Block> disguisedBlocks, Collection<ResourceLocation> recipes) {
 
     public static final Stage EMPTY = new Stage(ThreeState.UNSET, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList());
 
     public List<ItemStack> stacks() {
-        return items().stream().flatMap(it -> it.getStacks().stream()).map(ItemStackJS::getItemStack).toList();
-    }
-
-    public Stream<RecipeFilter> recipeFilters() {
-        return Stream.of(
-                items().stream().map(item -> new OutputFilter(item, false)),
-                recipes().stream().map(IDFilter::new)
-        ).flatMap(Function.identity());
+        return items().stream().flatMap(it -> Arrays.stream(it.getItems())).toList();
     }
 
     public Stage merge(Stage other) {

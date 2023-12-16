@@ -1,33 +1,33 @@
 package com.possible_triangle.kubejs_stages.stage;
 
-import java.util.Optional;
-
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.possible_triangle.kubejs_stages.features.StagesDisguises;
-
-import dev.architectury.event.events.client.ClientPlayerEvent;
-import dev.architectury.event.events.common.LifecycleEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.MinecraftServer;
+
+import java.util.Optional;
 
 public class Stages {
 
     private static StagesAccess clientAccess = null;
     private static ServerStagesAccess serverAccess = null;
 
-    public static void setup() {
-        ClientPlayerEvent.CLIENT_PLAYER_JOIN.register($ -> {
-            clientAccess = new ClientStagesAccess();
-            registerListeners();
-        });
+    public static void initClient() {
+        clientAccess = new ClientStagesAccess();
+        registerListeners();
+    }
 
-        ClientPlayerEvent.CLIENT_PLAYER_QUIT.register($ -> {
-            clientAccess = null;
-        });
+    public static void clearClient() {
+        clientAccess = null;
+    }
 
-        LifecycleEvent.SETUP.register(() -> {
-            serverAccess = new ServerStagesAccess();
-            registerListeners();
-        });
+    public static void initServer(MinecraftServer server) {
+        serverAccess = new ServerStagesAccess(server);
+        registerListeners();
+    }
+
+    public static void clearServer() {
+        serverAccess = null;
     }
 
     private static void registerListeners() {

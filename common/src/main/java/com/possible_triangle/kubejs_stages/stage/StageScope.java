@@ -1,28 +1,26 @@
 package com.possible_triangle.kubejs_stages.stage;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.possible_triangle.kubejs_stages.KubeJSStages;
 import com.possible_triangle.kubejs_stages.StageConfig;
-
-import com.possible_triangle.kubejs_stages.platform.PlatformHelper;
-
+import com.possible_triangle.kubejs_stages.platform.Services;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.Collection;
+import java.util.Collections;
+
 public abstract class StageScope {
 
-    private static final SimpleCommandExceptionType NO_PLAYER = new SimpleCommandExceptionType(new TextComponent("No player provided"));
+    private static final SimpleCommandExceptionType NO_PLAYER = new SimpleCommandExceptionType(Component.literal("No player provided"));
 
     private static final String STAGE_DATA_KEY = KubeJSStages.ID + "_stages";
 
     private static CompoundTag perPlayerData(Player player) {
-        var data = PlatformHelper.getPersistentData(player);
+        var data = Services.PLATFORM.getPersistentData(player);
         if (data.contains(STAGE_DATA_KEY, 10)) return data.getCompound(STAGE_DATA_KEY);
         var compound = new CompoundTag();
         data.put(STAGE_DATA_KEY, compound);
@@ -30,7 +28,7 @@ public abstract class StageScope {
     }
 
     public static void restorePlayerData(ServerPlayer oldPlayer, ServerPlayer player) {
-        var data = PlatformHelper.getPersistentData(player);
+        var data = Services.PLATFORM.getPersistentData(player);
         data.put(STAGE_DATA_KEY, perPlayerData(oldPlayer));
     }
 

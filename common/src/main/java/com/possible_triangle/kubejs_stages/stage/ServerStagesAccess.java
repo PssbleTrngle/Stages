@@ -1,12 +1,5 @@
 package com.possible_triangle.kubejs_stages.stage;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -14,16 +7,23 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.possible_triangle.kubejs_stages.KubeJSStages;
 import com.possible_triangle.kubejs_stages.network.StagesNetwork;
 import com.possible_triangle.kubejs_stages.network.SyncMessage;
-
-import dev.architectury.event.events.common.LifecycleEvent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
+import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
 public class ServerStagesAccess extends StagesAccess {
 
-    public ServerStagesAccess() {
-        LifecycleEvent.SERVER_STOPPED.register($ -> clear());
+    @Nullable
+    private final MinecraftServer server;
+
+    public ServerStagesAccess(MinecraftServer server) {
+        this.server = server;
     }
 
     private Map<String, Stage> definedStages = Collections.emptyMap();
@@ -34,7 +34,7 @@ public class ServerStagesAccess extends StagesAccess {
         notifyListeners();
     }
 
-    private static final DynamicCommandExceptionType NOT_FOUND = new DynamicCommandExceptionType(id -> new TextComponent(String.format("stage does not exist: '%s'", id)));
+    private static final DynamicCommandExceptionType NOT_FOUND = new DynamicCommandExceptionType(id -> Component.literal(String.format("stage does not exist: '%s'", id)));
 
     public void assertExists(String id) throws CommandSyntaxException {
         if (!definedStages.containsKey(id)) throw NOT_FOUND.create(id);
@@ -82,7 +82,7 @@ public class ServerStagesAccess extends StagesAccess {
     }
 
     private @Nullable MinecraftServer getServer() {
-        return KubeJSStages.getServer();
+        return server;
     }
 
     public void finishLoad() {
@@ -108,6 +108,6 @@ public class ServerStagesAccess extends StagesAccess {
 
     public SyncMessage createSyncMessage(ServerPlayer player) {
         var context = new StageContext(player.server, player, false);
-        return new SyncMessage(getDisabledContent(context), getDisabledStages(context).toList());
+        return new SyncMessage(getDisabledContent(context), getDisabledStages(context).toList(), player.server.registryAccess());
     }
 }

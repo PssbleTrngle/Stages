@@ -49,4 +49,5 @@ public class StageArgument implements ArgumentType<String> {
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
+
 }
