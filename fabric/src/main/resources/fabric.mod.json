@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "id": "kubejs_stages",
-  "version": "${version}",
+  "id": "${mod_id}",
+  "version": "${mod_version}",
 
-  "name": "KubeJS Stages",
+  "name": "${mod_name}",
   "description": "Lock content behind stages managed by KubeJS",
-  "authors": ["possible_triangle"],
+  "authors": ["${mod_author}"],
   "contact": {
-    "sources": "https://github.com/PssbleTrngle/KubeJS-Stages",
-    "issues": "https://github.com/PssbleTrngle/KubeJS-Stages"
+    "sources": "https://github.com/${repository}",
+    "issues": "https://github.com/${repository}"
   },
 
   "license": "CC0-1.0",
@@ -16,13 +16,13 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.possible_triangle.kubejs_stages.fabric.KubeJSStagesFabric"
+      "com.possible_triangle.stages.fabric.FabricEntrypoint"
     ],
     "jei_mod_plugin": [
-      "com.possible_triangle.kubejs_stages.features.StagesJEI"
+      "com.possible_triangle.stages.features.StagesJEI"
     ]
   },
-  "mixins": ["kubejs_stages.mixins.json"],
+  "mixins": ["${mod_id}.mixins.json"],
 
   "depends": {
     "fabricloader": ">=0.14",
