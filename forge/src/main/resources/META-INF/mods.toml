@@ -1,31 +1,27 @@
-modLoader = "javafml"
-loaderVersion = "[40,)"
+modLoader="javafml"
+loaderVersion = "[43,)"
 license = "All rights reserved"
-issueTrackerURL = "https://github.com/PssbleTrngle/KubeJS-Stages/issues"
+issueTrackerURL = "https://github.com/${repository}/issues"
+
 [[mods]]
-modId = "kubejs_stages"
-version = "${version}"
-displayName = "KubeJS Stages"
-authors = "possible_triangle"
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_author}"
 description = '''
-Lock content behind stages managed by KubeJS
+Lock content behind stages
 '''
 
-[[dependencies.kubejs_stages]]
+[[dependencies.${mod_id}]]
 modId = "forge"
 mandatory = true
-versionRange = "[38,)"
+versionRange = "[43,)"
 ordering = "NONE"
 side = "BOTH"
-[[dependencies.kubejs_stages]]
+
+[[dependencies.${mod_id}]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18,1.19)"
+versionRange = "[1.19,)"
 ordering = "NONE"
-side = "BOTH"
-[[dependencies.kubejs_stages]]
-modId = "kubejs"
-mandatory = true
-versionRange = "[1802.5.1-build.331,)"
-ordering = "AFTER"
 side = "BOTH"
