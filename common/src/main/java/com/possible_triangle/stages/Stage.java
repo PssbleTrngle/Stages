@@ -14,9 +14,10 @@ import java.util.Map;
 
 public record Stage(ThreeState defaultState, Collection<Ingredient> items, Collection<FluidStack> fluids,
                     Collection<String> categories,
-                    Map<Block, Block> disguisedBlocks, Collection<ResourceLocation> recipes) {
+                    Map<Block, Block> disguisedBlocks, Collection<ResourceLocation> recipes,
+                    Collection<ResourceLocation> parents) {
 
-    public static final Stage EMPTY = new Stage(ThreeState.UNSET, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList());
+    public static final Stage EMPTY = new Stage(ThreeState.UNSET, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList(), Collections.emptyList());
 
     public List<ItemStack> stacks() {
         return items().stream().flatMap(it -> Arrays.stream(it.getItems())).toList();
@@ -38,6 +39,9 @@ public record Stage(ThreeState defaultState, Collection<Ingredient> items, Colle
 
             this.recipes().forEach(builder::addRecipe);
             other.recipes().forEach(builder::addRecipe);
+
+            this.parents().forEach(builder::requires);
+            other.parents().forEach(builder::requires);
 
             if (this.defaultState != ThreeState.UNSET) builder.setDefaultState(this.defaultState);
             if (other.defaultState != ThreeState.UNSET) builder.setDefaultState(other.defaultState);

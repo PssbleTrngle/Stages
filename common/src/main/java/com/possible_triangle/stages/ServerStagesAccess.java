@@ -11,6 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import org.jetbrains.annotations.Nullable;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +25,7 @@ public class ServerStagesAccess extends StagesAccess {
 
     public void setServer(MinecraftServer server) {
         this.server = server;
-        if(server == null) clear();
+        if (server == null) clear();
     }
 
     public Optional<MinecraftServer> getServer() {
@@ -65,6 +66,11 @@ public class ServerStagesAccess extends StagesAccess {
     @Override
     public ThreeState getState(String id, StageContext context) {
         if (!definedStages.containsKey(id)) return ThreeState.UNSET;
+
+        var parents = definedStages.get(id).parents();
+        if (parents.stream().anyMatch(it -> getState(it.toString(), context) == ThreeState.DISABLED)) {
+            return ThreeState.DISABLED;
+        }
 
         var optionalState = Stream.of(StageScope.GLOBAL, StageScope.PLAYER)
                 .map(it -> it.getOptionalState(id, context))

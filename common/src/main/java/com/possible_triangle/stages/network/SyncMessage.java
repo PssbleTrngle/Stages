@@ -17,6 +17,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Function;
 
 public class SyncMessage {
@@ -77,7 +78,8 @@ public class SyncMessage {
         var resolvedBlocks = new ImmutableMap.Builder<Block, Block>();
         disguisedBlocks.forEach((key, value) -> resolvedBlocks.put(key.apply(registries), value.apply(registries)));
 
-        var content = new Stage(ThreeState.UNSET, resolvedItems, resolvedFluids, categories, resolvedBlocks.build(), recipes);
+        // TODO can move stages into parents
+        var content = new Stage(ThreeState.UNSET, resolvedItems, resolvedFluids, categories, resolvedBlocks.build(), recipes, Collections.emptyList());
         return new SyncMessage(content, stages, registries);
     }
 

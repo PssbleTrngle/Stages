@@ -33,7 +33,7 @@ public class StageBuilder {
     }
 
     public Stage build() {
-        return new Stage(defaultState, buildItems(), fluids.build(), categories.build(), disguisedBlocks.build(), recipes.build());
+        return new Stage(defaultState, buildItems(), fluids.build(), categories.build(), disguisedBlocks.build(), recipes.build(), parents.build());
     }
 
     private final ImmutableSet.Builder<Ingredient> items = new ImmutableSet.Builder<>();
@@ -43,6 +43,8 @@ public class StageBuilder {
     private final ImmutableSet.Builder<String> categories = new ImmutableSet.Builder<>();
     private final ImmutableMap.Builder<Block, Block> disguisedBlocks = new ImmutableMap.Builder<>();
     private final ImmutableSet.Builder<ResourceLocation> recipes = new ImmutableSet.Builder<>();
+
+    private final ImmutableSet.Builder<ResourceLocation> parents = new ImmutableSet.Builder<>();
 
     private ThreeState defaultState = ThreeState.UNSET;
 
@@ -84,6 +86,10 @@ public class StageBuilder {
 
     public void addRecipe(ResourceLocation id) {
         recipes.add(id);
+    }
+
+    public void requires(ResourceLocation parent) {
+        parents.add(parent);
     }
 
 }

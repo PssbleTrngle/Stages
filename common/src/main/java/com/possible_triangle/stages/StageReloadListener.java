@@ -75,6 +75,11 @@ public class StageReloadListener extends SimpleJsonResourceReloadListener {
                     tryDecode(() -> new ResourceLocation(it.getAsString()))
                             .ifPresent(builder::addRecipe)
             );
+
+            if (json.has("requires")) json.getAsJsonArray("requires").forEach(it ->
+                    tryDecode(() -> new ResourceLocation(it.getAsString()))
+                            .ifPresent(builder::requires)
+            );
         });
 
         return Optional.of(stage);
