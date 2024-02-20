@@ -26,11 +26,9 @@ public class StageEnabledCondition implements ICondition {
 
     @Override
     public boolean test(IContext context) {
-        return Stages.getServerAccess()
-                .flatMap(access -> access.getServer().filter(server ->
-                        !access.isDisabled(stage, new StageContext(server, null, false)))
-                )
-                .isPresent();
+        var access = Stages.getServerAccess().orElseThrow(() -> new IllegalStateException("server access not initialized yet"));
+        var server = access.getServer().orElse(null);
+        return !access.isDisabled(stage, new StageContext(server, null, false));
     }
 
     @Override
