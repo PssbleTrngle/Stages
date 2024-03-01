@@ -65,7 +65,10 @@ public class ServerStagesAccess extends StagesAccess {
 
     @Override
     public ThreeState getState(String id, StageContext context) {
-        if (!definedStages.containsKey(id)) return ThreeState.UNSET;
+        if (!definedStages.containsKey(id)) {
+            throw new IllegalStateException("Stages not loaded yet");
+            //return ThreeState.UNSET;
+        }
 
         var parents = definedStages.get(id).parents();
         if (parents.stream().anyMatch(it -> getState(it.toString(), context) == ThreeState.DISABLED)) {

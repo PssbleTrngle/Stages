@@ -55,9 +55,9 @@ public class ForgeEntrypoint {
             StageCommand.register(event.getDispatcher());
         });
 
-        MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
-            event.addListener(new StageReloadListener());
-        });
+        //MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
+        //    event.addListener(new StageReloadListener());
+        //});
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> clientInit());
     }

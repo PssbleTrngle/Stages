@@ -9,34 +9,53 @@ import com.possible_triangle.stages.platform.FluidStack;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
-public class StageReloadListener extends SimpleJsonResourceReloadListener {
+public class StageReloadListener implements PreparableReloadListener {
 
-    private static final Gson GSON = new GsonBuilder().create();
+    private class Inner extends SimpleJsonResourceReloadListener {
 
-    public StageReloadListener() {
-        super(GSON, "stage");
+        private static final Gson GSON = new GsonBuilder().create();
+
+        public Inner() {
+            super(GSON, "stage");
+        }
+
+        @Override
+        protected void apply(Map<ResourceLocation, JsonElement> loaded, ResourceManager manager, ProfilerFiller profiler) {
+            Stages.getServerAccess().ifPresent(access -> {
+                loaded.forEach((id, json) -> {
+                    decode(json).ifPresent(stage -> {
+                        access.registerStage(id.toString(), stage);
+                    });
+                });
+
+                access.finishLoad();
+            });
+        }
     }
 
-    @Override
-    protected void apply(Map<ResourceLocation, JsonElement> loaded, ResourceManager manager, ProfilerFiller profiler) {
-        Stages.getServerAccess().ifPresent(access -> {
-            loaded.forEach((id, json) -> {
-                decode(json).ifPresent(stage -> {
-                    access.registerStage(id.toString(), stage);
-                });
-            });
+    private final Inner inner = new Inner();
 
-            access.finishLoad();
-        });
+    @Override
+    public String getName() {
+        return "Stages";
+    }
+
+    public final CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier barrier, ResourceManager manager, ProfilerFiller profiler1, ProfilerFiller profiler2, Executor executor1, Executor executor2) {
+        var reload = inner.reload(CompletableFuture::completedFuture, manager, profiler1, profiler1, executor1, executor1);
+        return reload.thenCompose(barrier::wait);
     }
 
     private static Optional<StageBuilder> decode(JsonElement element) {

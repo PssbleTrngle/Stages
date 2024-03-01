@@ -18,6 +18,7 @@ public class FabricEntrypoint implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        /*
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
             private PreparableReloadListener inner = new StageReloadListener();
             private ResourceLocation id = new ResourceLocation(CommonClass.ID, "listener");
@@ -32,6 +33,7 @@ public class FabricEntrypoint implements ModInitializer {
                 return inner.reload(preparationBarrier, resourceManager  , profilerFiller, profilerFiller2, executor, executor2);
             }
         });
+         */
     }
 
 }
