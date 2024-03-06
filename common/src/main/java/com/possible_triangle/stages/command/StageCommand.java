@@ -27,7 +27,7 @@ public class StageCommand {
     private static final Dynamic2CommandExceptionType ALREADY_STATE = new Dynamic2CommandExceptionType((a, b) -> Component.literal(String.format("%s is already %s", a, b)));
 
     private static Predicate<CommandSourceStack> permission() {
-        return it -> it.hasPermission(3);
+        return it -> it.hasPermission(2);
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> stateNode(ThreeState state) {
