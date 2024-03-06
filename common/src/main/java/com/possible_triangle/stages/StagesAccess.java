@@ -1,16 +1,16 @@
 package com.possible_triangle.stages;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-
-import org.jetbrains.annotations.Nullable;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 
 public abstract class StagesAccess {
 
@@ -20,13 +20,13 @@ public abstract class StagesAccess {
         Runnable onUpdate(StagesAccess access);
     }
 
-    public abstract ThreeState getState(String id, StageContext context);
+    public abstract ThreeState getState(ResourceLocation id, StageContext context);
 
-    public final boolean isEnabled(String id, StageContext context) {
+    public final boolean isEnabled(ResourceLocation id, StageContext context) {
         return getState(id, context) == ThreeState.ENABLED;
     }
 
-    public final boolean isDisabled(String id, StageContext context) {
+    public final boolean isDisabled(ResourceLocation id, StageContext context) {
         return getState(id, context) == ThreeState.DISABLED;
     }
 
@@ -34,7 +34,7 @@ public abstract class StagesAccess {
     private List<Runnable> cleanup = Collections.emptyList();
 
 
-    public abstract Stream<String> getDisabledStages(StageContext context);
+    public abstract Stream<ResourceLocation> getDisabledStages(StageContext context);
 
     public abstract Stage getDisabledContent(StageContext context);
 

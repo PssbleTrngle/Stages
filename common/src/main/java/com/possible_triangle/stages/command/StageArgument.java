@@ -15,16 +15,16 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class StageArgument implements ArgumentType<String> {
+public class StageArgument implements ArgumentType<ResourceLocation> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "bar");
 
-    public static String get(String name, CommandContext<CommandSourceStack> ctx) {
-        return ctx.getArgument(name, String.class);
+    public static ResourceLocation get(String name, CommandContext<CommandSourceStack> ctx) {
+        return ctx.getArgument(name, ResourceLocation.class);
     }
 
     @Override
-    public String parse(StringReader reader) throws CommandSyntaxException {
-        return ResourceLocation.read(reader).toString();
+    public ResourceLocation parse(StringReader reader) throws CommandSyntaxException {
+        return ResourceLocation.read(reader);
     }
 
     @Override
@@ -36,6 +36,7 @@ public class StageArgument implements ArgumentType<String> {
             Stages.getServerAccess()
                     .map(ServerStagesAccess::getStages)
                     .ifPresent(stages -> stages
+                            .map(ResourceLocation::toString)
                             .filter(it -> it.startsWith(start))
                             .forEach(builder::suggest)
                     );

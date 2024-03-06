@@ -13,9 +13,9 @@ public class StageEnabledCondition implements ICondition {
 
     private static final ResourceLocation ID = new ResourceLocation(CommonClass.ID, "stage_enabled");
 
-    private final String stage;
+    private final ResourceLocation stage;
 
-    public StageEnabledCondition(String stage) {
+    public StageEnabledCondition(ResourceLocation stage) {
         this.stage = stage;
     }
 
@@ -40,12 +40,12 @@ public class StageEnabledCondition implements ICondition {
 
         @Override
         public void write(JsonObject json, StageEnabledCondition value) {
-            json.addProperty("stage", value.stage);
+            json.addProperty("stage", value.stage.toString());
         }
 
         @Override
         public StageEnabledCondition read(JsonObject json) {
-            return new StageEnabledCondition(GsonHelper.getAsString(json, "stage"));
+            return new StageEnabledCondition(new ResourceLocation(GsonHelper.getAsString(json, "stage")));
         }
 
         @Override

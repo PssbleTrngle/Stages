@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public record Stage(ThreeState defaultState, Collection<Ingredient> items, Collection<FluidStack> fluids,
                     Collection<String> categories,
@@ -23,29 +24,30 @@ public record Stage(ThreeState defaultState, Collection<Ingredient> items, Colle
         return items().stream().flatMap(it -> Arrays.stream(it.getItems())).toList();
     }
 
+    private void addTo(StageBuilder builder) {
+        this.items().forEach(builder::addItem);
+        this.fluids().forEach(builder::addFluid);
+        this.categories().forEach(builder::addCategory);
+        this.disguisedBlocks().forEach(builder::disguiseBlock);
+        this.recipes().forEach(builder::addRecipe);
+        this.parents().forEach(builder::requires);
+        if (this.defaultState != ThreeState.UNSET) builder.setDefaultState(this.defaultState);
+    }
+
     public Stage merge(Stage other) {
         return StageBuilder.create(builder -> {
-            this.items().forEach(builder::addItem);
-            other.items().forEach(builder::addItem);
-
-            this.fluids().forEach(builder::addFluid);
-            other.fluids().forEach(builder::addFluid);
-
-            this.categories().forEach(builder::addCategory);
-            other.categories().forEach(builder::addCategory);
-
-            this.disguisedBlocks().forEach(builder::disguiseBlock);
-            other.disguisedBlocks().forEach(builder::disguiseBlock);
-
-            this.recipes().forEach(builder::addRecipe);
-            other.recipes().forEach(builder::addRecipe);
+            this.addTo(builder);
+            other.addTo(builder);
 
             this.parents().forEach(builder::requires);
             other.parents().forEach(builder::requires);
-
-            if (this.defaultState != ThreeState.UNSET) builder.setDefaultState(this.defaultState);
-            if (other.defaultState != ThreeState.UNSET) builder.setDefaultState(other.defaultState);
         }).build();
+    }
+
+    public Stage withParents(Stream<ResourceLocation> parents) {
+        var builder = StageBuilder.create(this::addTo);
+        parents.forEach(builder::requires);
+        return builder.build();
     }
 
     public String info() {

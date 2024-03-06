@@ -1,12 +1,12 @@
 package com.possible_triangle.stages.network;
 
 import com.google.common.collect.ImmutableMap;
-import com.possible_triangle.stages.CommonClass;
-import com.possible_triangle.stages.platform.FluidStack;
 import com.possible_triangle.stages.ClientStagesAccess;
+import com.possible_triangle.stages.CommonClass;
 import com.possible_triangle.stages.Stage;
 import com.possible_triangle.stages.Stages;
 import com.possible_triangle.stages.ThreeState;
+import com.possible_triangle.stages.platform.FluidStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
@@ -16,19 +16,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.function.Function;
 
 public class SyncMessage {
 
     public final Stage content;
-    public final Collection<String> stages;
     private final RegistryAccess registries;
 
-    public SyncMessage(Stage content, Collection<String> stages, RegistryAccess registries) {
+    public SyncMessage(Stage content, RegistryAccess registries) {
         this.content = content;
-        this.stages = stages;
         this.registries = registries;
     }
 
@@ -50,7 +46,7 @@ public class SyncMessage {
         var fluidRegistry = registries.registryOrThrow(Registry.FLUID_REGISTRY);
         var blockRegistry = registries.registryOrThrow(Registry.BLOCK_REGISTRY);
 
-        buf.writeCollection(stages, FriendlyByteBuf::writeUtf);
+        buf.writeCollection(content.parents(), (b, id) -> b.writeUtf(id.toString()));
 
         buf.writeCollection(content.stacks().stream().map(ItemStack::getItem).toList(), writeEntry(itemRegistry));
         buf.writeCollection(content.fluids().stream().map(FluidStack::fluid).toList(), writeEntry(fluidRegistry));
@@ -62,7 +58,7 @@ public class SyncMessage {
     }
 
     public static SyncMessage decode(FriendlyByteBuf buf) {
-        var stages = buf.readList(FriendlyByteBuf::readUtf);
+        var stages = buf.readList(it -> new ResourceLocation(it.readUtf()));
 
         var items = buf.readList(b -> readEntry(b, Registry.ITEM_REGISTRY).andThen(Ingredient::of));
         var fluids = buf.readList(b -> readEntry(b, Registry.FLUID_REGISTRY).andThen(FluidStack::of));
@@ -79,8 +75,8 @@ public class SyncMessage {
         disguisedBlocks.forEach((key, value) -> resolvedBlocks.put(key.apply(registries), value.apply(registries)));
 
         // TODO can move stages into parents
-        var content = new Stage(ThreeState.UNSET, resolvedItems, resolvedFluids, categories, resolvedBlocks.build(), recipes, Collections.emptyList());
-        return new SyncMessage(content, stages, registries);
+        var content = new Stage(ThreeState.UNSET, resolvedItems, resolvedFluids, categories, resolvedBlocks.build(), recipes, stages);
+        return new SyncMessage(content, registries);
     }
 
     public void handle() {

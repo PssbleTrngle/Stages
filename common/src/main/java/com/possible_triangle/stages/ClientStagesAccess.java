@@ -1,30 +1,26 @@
 package com.possible_triangle.stages;
 
 import com.possible_triangle.stages.network.SyncMessage;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.stream.Stream;
 
 public class ClientStagesAccess extends StagesAccess {
-
-    private Collection<String> disabledStages = Collections.emptyList();
     private Stage disabledContent = Stage.EMPTY;
 
     @Override
-    public ThreeState getState(String id, StageContext context) {
-        return disabledStages.contains(id) ? ThreeState.DISABLED : ThreeState.ENABLED;
+    public ThreeState getState(ResourceLocation id, StageContext context) {
+        return disabledContent.parents().contains(id) ? ThreeState.DISABLED : ThreeState.ENABLED;
     }
 
     public void receiveSync(SyncMessage message) {
         disabledContent = message.content;
-        disabledStages = message.stages;
         Stages.requireAccess().notifyListeners();
     }
 
     @Override
-    public Stream<String> getDisabledStages(StageContext context) {
-        return disabledStages.stream();
+    public Stream<ResourceLocation> getDisabledStages(StageContext context) {
+        return disabledContent.parents().stream();
     }
 
     @Override

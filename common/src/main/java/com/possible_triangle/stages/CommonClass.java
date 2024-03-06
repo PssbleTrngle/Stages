@@ -6,6 +6,6 @@ import org.apache.logging.log4j.Logger;
 public class CommonClass {
 
     public static final String ID = "stages";
-    public static final Logger LOGGER = LogManager.getLogger("KubeJS Stages");
+    public static final Logger LOGGER = LogManager.getLogger("Stages");
 
 }

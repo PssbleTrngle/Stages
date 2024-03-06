@@ -4,7 +4,7 @@
   "version": "${mod_version}",
 
   "name": "${mod_name}",
-  "description": "Lock content behind stages managed by KubeJS",
+  "description": "Lock content behind stages driven by datapacks",
   "authors": ["${mod_author}"],
   "contact": {
     "sources": "https://github.com/${repository}",
@@ -28,7 +28,6 @@
     "fabricloader": ">=0.14",
     "fabric": "*",
     "minecraft": "1.19.x",
-    "kubejs": ">=1902.6.0-build.99",
     "java": ">=17"
   }
 }

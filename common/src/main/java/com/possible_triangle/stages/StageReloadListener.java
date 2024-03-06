@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 
 public class StageReloadListener implements PreparableReloadListener {
 
-    private class Inner extends SimpleJsonResourceReloadListener {
+    private static class Inner extends SimpleJsonResourceReloadListener {
 
         private static final Gson GSON = new GsonBuilder().create();
 
@@ -37,7 +37,7 @@ public class StageReloadListener implements PreparableReloadListener {
             Stages.getServerAccess().ifPresent(access -> {
                 loaded.forEach((id, json) -> {
                     decode(json).ifPresent(stage -> {
-                        access.registerStage(id.toString(), stage);
+                        access.registerStage(id, stage);
                     });
                 });
 

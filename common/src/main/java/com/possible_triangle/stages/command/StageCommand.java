@@ -1,8 +1,5 @@
 package com.possible_triangle.stages.command;
 
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -14,13 +11,16 @@ import com.possible_triangle.stages.StageScope;
 import com.possible_triangle.stages.Stages;
 import com.possible_triangle.stages.StagesAccess;
 import com.possible_triangle.stages.ThreeState;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class StageCommand {
 
@@ -82,6 +82,7 @@ public class StageCommand {
         var context = createContext(ctx, false);
         var stages = access.getStages()
                 .filter(it -> predicate.test(access, it, context))
+                .map(ResourceLocation::toString)
                 .toList();
 
         var ids = String.join(", ", stages);
@@ -140,6 +141,6 @@ public class StageCommand {
 
     @FunctionalInterface
     private interface StagePredicate {
-        boolean test(StagesAccess access, String id, StageContext context);
+        boolean test(StagesAccess access, ResourceLocation id, StageContext context);
     }
 }
