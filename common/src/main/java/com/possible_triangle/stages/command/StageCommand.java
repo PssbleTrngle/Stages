@@ -30,9 +30,9 @@ public class StageCommand {
         return it -> it.hasPermission(2);
     }
 
-    private static LiteralArgumentBuilder<CommandSourceStack> stateNode(ThreeState state) {
+    private static LiteralArgumentBuilder<CommandSourceStack> stateNode(ThreeState state, String literal) {
         var playerArg = Commands.argument("player", EntityArgument.players());
-        return Commands.literal(state.name().toLowerCase()).then(
+        return Commands.literal(literal).then(
                 Commands.literal("*")
                         .executes(setStates(state, StageScope.GLOBAL))
                         .then(playerArg.executes(setStates(state, StageScope.PLAYER)))
@@ -45,9 +45,9 @@ public class StageCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("stages").requires(permission())
-                .then(stateNode(ThreeState.ENABLED))
-                .then(stateNode(ThreeState.DISABLED))
-                .then(stateNode(ThreeState.UNSET))
+                .then(stateNode(ThreeState.ENABLED, "enable"))
+                .then(stateNode(ThreeState.DISABLED, "disable"))
+                .then(stateNode(ThreeState.UNSET, "reset"))
                 .then(
                         Commands.literal("list").executes(StageCommand::list).then(
                                 Commands.literal("enabled").executes(ctx -> list(ctx, StagesAccess::isEnabled))
