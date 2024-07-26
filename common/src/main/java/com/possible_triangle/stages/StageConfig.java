@@ -65,7 +65,7 @@ public class StageConfig {
     }
 
     public static StageConfig instance(@Nullable MinecraftServer server) {
-        if(server == null) CommonClass.LOGGER.warn("Accessing global scope without server context");
+        if(server == null) CommonClass.LOGGER.trace("Accessing global scope without server context");
         if (instance == null) {
             CommonClass.LOGGER.debug("Loading config");
             instance = read();
