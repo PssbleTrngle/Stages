@@ -9,7 +9,7 @@ version = "${mod_version}"
 displayName = "${mod_name}"
 authors = "${mod_author}"
 description = '''
-Lock content behind stages
+Lock content behind stages driven by datapacks
 '''
 
 [[dependencies.${mod_id}]]
