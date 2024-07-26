@@ -1,4 +1,4 @@
-# Stages
+# Stages <!-- modrinth_exclude.start --> <img src="https://raw.githubusercontent.com/PssbleTrngle/Stages/1.19.x/common/src/main/resources/assets/stages/icon.svg" align="right" height="128" /> <!-- modrinth_exclude.end -->
 
 This project is yet another attempt at creating a "Stage" mod which enabled modpack creators to lock specific content behind conditions.
 In this case, the content is defined via JSON files inside a datapack and can be granted/revoked using commands.
