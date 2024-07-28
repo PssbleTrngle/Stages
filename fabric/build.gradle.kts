@@ -7,7 +7,7 @@ fabric {
 
     dataGen()
 
-    includesMod("io.github.fabricators_of_create.Porting-Lib:Porting-Lib:${porting_lib_version}+${mc_version}")
+//    includesMod("io.github.fabricators_of_create.Porting-Lib:Porting-Lib:${porting_lib_version}+${mc_version}")
     dependOn(project(":common"))
 }
 

@@ -30,10 +30,10 @@ dependencies {
 
     if (!env.isCI) {
         modRuntimeOnly("mezz.jei:jei-${mc_version}-forge:${jei_version}")
-        modRuntimeOnly("maven.modrinth:create:${create_forge_version}")
-        modRuntimeOnly("maven.modrinth:patchouli:${patchouli_forge_version}")
-        modRuntimeOnly("maven.modrinth:curios:${curios_forge_version}")
-        modRuntimeOnly("maven.modrinth:botania:${botania_forge_version}")
+        // modRuntimeOnly("maven.modrinth:create:${create_forge_version}")
+        // modRuntimeOnly("maven.modrinth:patchouli:${patchouli_forge_version}")
+        // modRuntimeOnly("maven.modrinth:curios:${curios_forge_version}")
+        // modRuntimeOnly("maven.modrinth:botania:${botania_forge_version}")
     }
 }
 

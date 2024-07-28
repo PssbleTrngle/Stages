@@ -6,7 +6,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import com.possible_triangle.stages.platform.FluidStack;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -82,8 +83,8 @@ public class StageReloadListener implements PreparableReloadListener {
 
             if (json.has("disguisedBlocks")) json.getAsJsonObject("disguisedBlocks").entrySet().forEach(it ->
                     tryDecode(() -> {
-                                var disguised = Registry.BLOCK.getOrThrow(ResourceKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(it.getKey())));
-                                var disguise = Registry.BLOCK.getOrThrow(ResourceKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(it.getValue().getAsString())));
+                                var disguised = BuiltInRegistries.BLOCK.getOrThrow(ResourceKey.create(Registries.BLOCK, new ResourceLocation(it.getKey())));
+                                var disguise = BuiltInRegistries.BLOCK.getOrThrow(ResourceKey.create(Registries.BLOCK, new ResourceLocation(it.getValue().getAsString())));
                                 return new Pair<>(disguised, disguise);
                             }
                     ).ifPresent(pair -> builder.disguiseBlock(pair.getFirst(), pair.getSecond()))

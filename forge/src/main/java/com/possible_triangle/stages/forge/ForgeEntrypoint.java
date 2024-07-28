@@ -1,20 +1,18 @@
 package com.possible_triangle.stages.forge;
 
 import com.possible_triangle.stages.CommonClass;
-import com.possible_triangle.stages.StageReloadListener;
+import com.possible_triangle.stages.Stages;
 import com.possible_triangle.stages.command.StageArgument;
 import com.possible_triangle.stages.command.StageCommand;
 import com.possible_triangle.stages.forge.platform.ForgeNetwork;
-import com.possible_triangle.stages.Stages;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
@@ -27,7 +25,7 @@ import net.minecraftforge.registries.DeferredRegister;
 
 @Mod(CommonClass.ID)
 public class ForgeEntrypoint {
-    private static final DeferredRegister<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPES = DeferredRegister.create(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, CommonClass.ID);
+    private static final DeferredRegister<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPES = DeferredRegister.create(Registries.COMMAND_ARGUMENT_TYPE, CommonClass.ID);
 
     public ForgeEntrypoint() {
         var modBus = FMLJavaModLoadingContext.get().getModEventBus();

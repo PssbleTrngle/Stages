@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion = "[43,)"
+loaderVersion = "[47,)"
 license = "All rights reserved"
 issueTrackerURL = "https://github.com/${repository}/issues"
 
@@ -15,13 +15,13 @@ Lock content behind stages driven by datapacks
 [[dependencies.${mod_id}]]
 modId = "forge"
 mandatory = true
-versionRange = "[43,)"
+versionRange = "[47,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${mod_id}]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19,)"
+versionRange = "[1.20.1,)"
 ordering = "NONE"
 side = "BOTH"

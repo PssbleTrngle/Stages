@@ -3,7 +3,7 @@ val mod_version: String by extra
 
 plugins {
     idea
-    id("com.possible-triangle.gradle") version ("0.1.4")
+    id("com.possible-triangle.gradle") version ("0.1.5")
 }
 
 subprojects {

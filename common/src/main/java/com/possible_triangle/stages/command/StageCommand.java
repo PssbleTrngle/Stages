@@ -87,7 +87,7 @@ public class StageCommand {
 
         var ids = String.join(", ", stages);
         var size = stages.size();
-        ctx.getSource().sendSuccess(Component.literal(String.format("%s disabled stages: %s", size, ids)), false);
+        ctx.getSource().sendSuccess(() -> Component.literal(String.format("%s disabled stages: %s", size, ids)), false);
         return size;
     }
 
@@ -95,7 +95,7 @@ public class StageCommand {
         var access = Stages.getServerAccess().orElseThrow();
         var context = createContext(ctx, true);
         var stages = access.getStages().toList();
-        ctx.getSource().sendSuccess(Component.literal(String.format("Found %s stages", stages.size())), false);
+        ctx.getSource().sendSuccess(() -> Component.literal(String.format("Found %s stages", stages.size())), false);
 
         stages.forEach(id -> {
             var state = access.getState(id, context);
@@ -105,7 +105,7 @@ public class StageCommand {
                 case UNSET -> Component.literal("unset").withStyle(ChatFormatting.GRAY)
                         .append(String.format(" (default: %s)", access.getDefaultState(id)));
             };
-            ctx.getSource().sendSuccess(Component.literal(String.format("   %s: ", id)).append(status), false);
+            ctx.getSource().sendSuccess(() -> Component.literal(String.format("   %s: ", id)).append(status), false);
         });
         return stages.size();
     }
@@ -119,7 +119,8 @@ public class StageCommand {
                 var changed = scope.setStates(ids, state, target);
                 if (changed > 0) affected++;
             }
-            ctx.getSource().sendSuccess(Component.literal("Updated stages for " + affected + " players"), true);
+            final var affectedConst = affected;
+            ctx.getSource().sendSuccess(() -> Component.literal("Updated stages for " + affectedConst + " players"), true);
             return affected;
         };
     }
@@ -134,7 +135,8 @@ public class StageCommand {
                 if (success) affected++;
             }
             if (affected == 0) throw ALREADY_STATE.create(stage, state.name());
-            ctx.getSource().sendSuccess(Component.literal(String.format("Successfully set state of %s to %s for %s players", stage, state.name(), affected)), true);
+            final var affectedConst = affected;
+            ctx.getSource().sendSuccess(() -> Component.literal(String.format("Successfully set state of %s to %s for %s players", stage, state.name(), affectedConst)), true);
             return 1;
         };
     }

@@ -9,6 +9,8 @@ import com.possible_triangle.stages.ThreeState;
 import com.possible_triangle.stages.platform.FluidStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -42,9 +44,9 @@ public class SyncMessage {
     }
 
     public FriendlyByteBuf encode(FriendlyByteBuf buf) {
-        var itemRegistry = registries.registryOrThrow(Registry.ITEM_REGISTRY);
-        var fluidRegistry = registries.registryOrThrow(Registry.FLUID_REGISTRY);
-        var blockRegistry = registries.registryOrThrow(Registry.BLOCK_REGISTRY);
+        var itemRegistry = registries.registryOrThrow(Registries.ITEM);
+        var fluidRegistry = registries.registryOrThrow(Registries.FLUID);
+        var blockRegistry = registries.registryOrThrow(Registries.BLOCK);
 
         buf.writeCollection(content.parents(), (b, id) -> b.writeUtf(id.toString()));
 
@@ -60,13 +62,13 @@ public class SyncMessage {
     public static SyncMessage decode(FriendlyByteBuf buf) {
         var stages = buf.readList(it -> new ResourceLocation(it.readUtf()));
 
-        var items = buf.readList(b -> readEntry(b, Registry.ITEM_REGISTRY).andThen(Ingredient::of));
-        var fluids = buf.readList(b -> readEntry(b, Registry.FLUID_REGISTRY).andThen(FluidStack::of));
+        var items = buf.readList(b -> readEntry(b, Registries.ITEM).andThen(Ingredient::of));
+        var fluids = buf.readList(b -> readEntry(b, Registries.FLUID).andThen(FluidStack::of));
         var categories = buf.readList(FriendlyByteBuf::readUtf);
-        var disguisedBlocks = buf.readMap(b -> readEntry(b, Registry.BLOCK_REGISTRY), b -> readEntry(b, Registry.BLOCK_REGISTRY));
+        var disguisedBlocks = buf.readMap(b -> readEntry(b, Registries.BLOCK), b -> readEntry(b, Registries.BLOCK));
         var recipes = buf.readList(b -> new ResourceLocation(b.readUtf()));
 
-        var registries = RegistryAccess.BUILTIN.get();
+        var registries = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
         var resolvedItems = items.stream().map(it -> it.apply(registries)).toList();
         var resolvedFluids = fluids.stream().map(it -> it.apply(registries)).toList();
